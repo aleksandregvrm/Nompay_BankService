@@ -1,0 +1,39 @@
+type Query {
+    getUser(id: Int!): User
+    graphTest(userId: String!): String
+}
+
+type Mutation {
+    createUser(input: CreateUserInput!): User
+    updateUser(userId: Int!, input: UpdateUserInput!): User
+    deleteUser(userId: Int!): String
+}
+
+type User {
+    id: Int!
+    email: String!
+    username: String!
+    password: String!
+    name: String!
+    surname: String!
+    createDate: String!
+}
+
+input CreateUserInput {
+    email: String!
+    username: String!
+    password: String!
+    name: String!
+}
+
+input UpdateUserInput {
+    email: String
+    username: String
+    password: String
+    name: String
+}
+
+
+
+
+
