@@ -36,6 +36,9 @@ class AccountEntity(
   @JoinColumn(name = "owner_user_id")
   @JsonIgnore
   lateinit var ownerUser: UserEntity
+  override fun toString(): String {
+    return "AccountEntity(email='$email', name='$name', currency=$currency, iban='$iban', id=$id, balance=$balance, ownerUser=$ownerUser)"
+  }
 }
 
 interface AccountEntityRepository : JpaRepository<AccountEntity, Long> {
