@@ -11,6 +11,9 @@ import java.time.Instant
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["email"]),
     UniqueConstraint(columnNames = ["username"])
+  ],
+  indexes = [
+    Index(name = "idx_user_email", columnList = "email")
   ]
 )
 class UserEntity(
@@ -53,6 +56,10 @@ class UserEntity(
   @PreUpdate
   fun preUpdate() {
     updateDate = Instant.now()
+  }
+
+  override fun toString(): String {
+    return "UserEntity(email='$email', name='$name', username='$username', birthDate=$birthDate, id=$id, createDate=$createDate, password='$password', updateDate=$updateDate, accounts=$accounts)"
   }
 }
 

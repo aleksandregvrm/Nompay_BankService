@@ -24,6 +24,7 @@ input CreateUserInput {
     username: String!
     password: String!
     name: String!
+    birthDate: String!
 }
 
 input UpdateUserInput {

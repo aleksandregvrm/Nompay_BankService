@@ -1,0 +1,47 @@
+extend type Query {
+    getAccount(id: Int!): Account
+}
+
+extend type Mutation {
+    createAccount(input: CreateAccountInput!): Account
+    updateAccount(input: UpdateAccountInput!): Account
+    transferFunds(input: TransferFundsInput!): String
+    reverseFunds(input: TransferFundsInput!): String
+}
+
+enum Currencies {
+    USD,
+    GBP,
+    EUR,
+    GEL
+}
+
+input CreateAccountInput {
+    email: String!
+    name: String!
+    currency: Currencies!
+}
+
+input UpdateAccountInput {
+    email: String!
+    name: String!
+}
+
+# Query for transferring funds from one account to another
+input TransferFundsInput {
+    currency: Currencies!
+    emailFrom: String
+    emailTo: String
+    accountFromId: String
+    accountToId: String
+}
+
+type Account {
+    id: Int!
+    email: String!
+    name: String!
+    currency: String!
+    iban: String!
+    balance: Int!
+    ownerUser: User
+}

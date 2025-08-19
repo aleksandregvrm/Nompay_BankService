@@ -29,6 +29,7 @@ class UserServiceImpl(
       } // Hashing password validation for runtime purposes...
     }
     userRepository.save(user); // Saving the user to the databse
+    println(user.toString())
     return user;
   }
 

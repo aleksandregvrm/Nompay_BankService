@@ -12,8 +12,7 @@ class UserController(
   private val userService: UserService
 ) {
 
-
-  @MutationMapping
+  @MutationMapping(name = "createUser")
   fun createUser(@Argument("input") input: CreateUserDto):UserEntity {
     return this.userService.createUser(input);
   }
