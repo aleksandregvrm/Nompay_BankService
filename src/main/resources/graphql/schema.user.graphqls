@@ -7,6 +7,7 @@ type Mutation {
     createUser(input: CreateUserInput!): User
     updateUser(userId: Int!, input: UpdateUserInput!): User
     deleteUser(userId: Int!): String
+    loginUser(input: LoginUserInput!): LoginUserOutput
 }
 
 type User {
@@ -32,6 +33,21 @@ input UpdateUserInput {
     username: String
     password: String
     name: String
+}
+
+input LoginUserInput {
+    username: String
+    email: String
+    password: String!
+}
+
+# Used when user successfully logs into the system
+type LoginUserOutput {
+    refreshToken: String!
+    accessToken: String!
+    username: String
+    email: String
+    timeStamp: String!
 }
 
 

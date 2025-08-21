@@ -1,4 +1,4 @@
-package com.nompay.banking_universal.utils.impl
+package com.nompay.banking_universal.utils
 
 interface PasswordService {
   fun hashPassword(password: String): String

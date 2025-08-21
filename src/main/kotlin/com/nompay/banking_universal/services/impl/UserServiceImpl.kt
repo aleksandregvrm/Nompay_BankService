@@ -1,6 +1,8 @@
 package com.nompay.banking_universal.services.impl
 
 import com.nompay.banking_universal.repositories.dto.user.CreateUserDto
+import com.nompay.banking_universal.repositories.dto.user.LoginUserDto
+import com.nompay.banking_universal.repositories.dto.user.LoginUserReturnDto
 import com.nompay.banking_universal.repositories.dto.user.UpdateUserDto
 import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
@@ -37,5 +39,8 @@ class UserServiceImpl(
     return "User data updated..."
   }
 
+  override fun loginUser(loginUserDto: LoginUserDto): LoginUserReturnDto {
+
+  }
 
 }

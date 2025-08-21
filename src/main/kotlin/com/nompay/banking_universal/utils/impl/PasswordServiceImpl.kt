@@ -1,5 +1,6 @@
 package com.nompay.banking_universal.utils.impl
 
+import com.nompay.banking_universal.utils.PasswordService
 import org.mindrot.jbcrypt.BCrypt
 import org.springframework.stereotype.Component
 
