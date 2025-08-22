@@ -13,7 +13,8 @@ import java.time.Instant
     UniqueConstraint(columnNames = ["username"])
   ],
   indexes = [
-    Index(name = "idx_user_email", columnList = "email")
+    Index(name = "idx_user_email", columnList = "email"),
+    Index(name = "idx_user_username", columnList = "username")
   ]
 )
 class UserEntity(
@@ -65,4 +66,5 @@ class UserEntity(
 
 interface UserEntityRepository : JpaRepository<UserEntity, Long> {
   fun findUserByEmail(email: String): UserEntity?
+  fun findUserByUsername(username: String): UserEntity?
 }
