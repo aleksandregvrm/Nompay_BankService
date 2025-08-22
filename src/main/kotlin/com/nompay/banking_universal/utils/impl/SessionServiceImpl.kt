@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component
 class SessionServiceImpl(
 
 ) : SessionService {
-  @Value("\${service.integratorHost}")
-  lateinit var signingSecret: String;
 
   @Value("\${service.tokenValidity}")
   lateinit var tokenValidityHours: Integer;

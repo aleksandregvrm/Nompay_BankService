@@ -36,5 +36,5 @@ class SessionEntity(
 }
 
 interface SessionEntityRepository : JpaRepository<SessionEntity, Long> {
-  fun findSessionWithUserId(userId: String): SessionEntity
+  fun findByUserId(userId: UserEntity): SessionEntity
 }

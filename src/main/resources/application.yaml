@@ -25,3 +25,4 @@ logging:
       springframework: info
 service:
   signingSecret: ${SIGNING_SECRET}
+  tokenValidity: ${TOKEN_VALIDITY}

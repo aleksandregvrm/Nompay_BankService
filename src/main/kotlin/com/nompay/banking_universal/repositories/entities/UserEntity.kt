@@ -47,6 +47,9 @@ class UserEntity(
   @OneToMany(mappedBy = "ownerUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   var accounts: MutableSet<AccountEntity> = mutableSetOf()
 
+  @OneToOne(mappedBy = "userId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  val sessionId: SessionEntity? = null
+
   @PrePersist
   fun prePersist() {
     val now = Instant.now()
