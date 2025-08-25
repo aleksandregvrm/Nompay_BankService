@@ -49,25 +49,26 @@ class UserServiceImpl(
   override fun loginUser(loginUserDto: LoginUserDto): LoginUserReturnDto {
     val (username, password, email) = loginUserDto;
 
-    var user: UserEntity? = null;
-
-    if (username != null) user = userRepository.findUserByUsername(username) else {
-      user = userRepository.findUserByEmail(email);
-    } // Looking up the relevant user...
+    val user = when {
+      username != null -> userRepository.findUserByUsername(username)
+      email != null -> userRepository.findUserByEmailIgnoreCase(email)
+      else -> throw IllegalArgumentException("Invalid Credentials")
+    }
+    println(user.toString())
 
     if (user == null) {
       throw IllegalArgumentException("Invalid Credentials")
     } // Making sure such user exists...
-
-    println(user.toString())
-
+    println("requestHereOverHere....")
+    println("request is reaching ion here before the password validation thing happens...")
     if (!this.passwordService.verifyPassword(password!!, user.password)) {
       throw IllegalArgumentException("Invalid Credentials")
     } // Checking wether the password is correct...
+    println(user.toString())
+    val tokens: Pair<String, String> = this.sessionService.generateSession(user)
 
-    val refreshToken: String = ""
-
-    val accessToken: String = ""
+    val accessToken = tokens.first;
+    val refreshToken = tokens.second;
 
     return LoginUserReturnDto.Builder()
       .withEmail(user.email)

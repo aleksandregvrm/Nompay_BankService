@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.time.Instant
 
 @Entity
-@Table(name = "sessions")
+@Table(name = "sessions", indexes = [
+  Index(name = "idx_session_user_id", columnList = "user_id")
+])
 class SessionEntity(
   @Column(name = "access_token")
   val accessToken: String,
@@ -32,6 +34,10 @@ class SessionEntity(
     val now = Instant.now()
     createDate = now
     updateDate = now
+  }
+
+  override fun toString(): String {
+    return "SessionEntity(accessToken='$accessToken', refreshToken='$refreshToken', userId=$userId, id=$id, createDate=$createDate, updateDate=$updateDate)"
   }
 }
 

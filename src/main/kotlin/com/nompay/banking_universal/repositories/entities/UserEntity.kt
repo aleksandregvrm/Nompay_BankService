@@ -68,6 +68,6 @@ class UserEntity(
 }
 
 interface UserEntityRepository : JpaRepository<UserEntity, Long> {
-  fun findUserByEmail(email: String): UserEntity?
+  fun findUserByEmailIgnoreCase(email: String): UserEntity?
   fun findUserByUsername(username: String): UserEntity?
 }
