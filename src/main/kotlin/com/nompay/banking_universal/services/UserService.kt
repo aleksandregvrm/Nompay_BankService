@@ -10,4 +10,5 @@ interface UserService {
   fun createUser(createUserDto: CreateUserDto): UserEntity
   fun updateUser(updateUserDto: UpdateUserDto): String
   fun loginUser(loginUserDto: LoginUserDto): LoginUserReturnDto
+  fun logoutUser(userId: Long, accessToken: String): String;
 }

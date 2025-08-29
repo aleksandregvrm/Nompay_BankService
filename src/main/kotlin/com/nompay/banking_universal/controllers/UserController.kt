@@ -7,6 +7,7 @@ import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.services.UserService
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
+import org.springframework.graphql.server.WebGraphQlRequest
 import org.springframework.stereotype.Controller
 
 @Controller
@@ -24,4 +25,17 @@ class UserController(
     return this.userService.loginUser(input);
   }
 
+  @MutationMapping(name = "logoutUser")
+  fun logoutUser(
+    @Argument("userId") userId: Int,
+    webGraphQlRequest: WebGraphQlRequest
+  ): String{
+    println(webGraphQlRequest.headers)
+    val authorization = webGraphQlRequest.headers.getFirst("Authorization");
+    if(authorization == null){
+      throw IllegalArgumentException("Not Authorized")
+    }
+
+    return this.userService.logoutUser(userId.toLong(), authorization);
+  }
 }

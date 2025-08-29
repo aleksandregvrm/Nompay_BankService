@@ -8,6 +8,7 @@ type Mutation {
     updateUser(userId: Int!, input: UpdateUserInput!): User
     deleteUser(userId: Int!): String
     loginUser(input: LoginUserInput!): LoginUserOutput
+    logoutUser(userId: Int!): String
 }
 
 type User {

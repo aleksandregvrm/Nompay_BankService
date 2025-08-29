@@ -43,4 +43,5 @@ class SessionEntity(
 
 interface SessionEntityRepository : JpaRepository<SessionEntity, Long> {
   fun findByUserId(userId: UserEntity): SessionEntity
+  fun deleteByUserId(userId: UserEntity): Long
 }

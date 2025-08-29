@@ -2,6 +2,7 @@ package com.nompay.banking_universal.utils.impl
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.exceptions.JWTVerificationException
 import com.nompay.banking_universal.repositories.entities.SessionEntity
 import com.nompay.banking_universal.repositories.entities.SessionEntityRepository
 import com.nompay.banking_universal.repositories.entities.UserEntity
@@ -27,7 +28,16 @@ class SessionServiceImpl(
 
 
   override fun checkTokenValidity(token: String): Boolean {
-    TODO("Not yet implemented")
+    return try {
+      val verifier = JWT.require(Algorithm.HMAC256(this.tokenSecret))
+        .withIssuer(this.sessionGiverOrganization)
+        .build()
+      verifier.verify(token);
+      true
+    } catch (e: JWTVerificationException) {
+      println(e.message)
+      false
+    }
   }
 
   /**

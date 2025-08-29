@@ -12,6 +12,7 @@ class PasswordServiceImpl : PasswordService {
   }
 
   override fun verifyPassword(candidate: String, hashed: String): Boolean {
+    println(candidate + "," +  hashed)
     return BCrypt.checkpw(candidate, hashed);
   }
 }
