@@ -1,13 +1,18 @@
 package com.nompay.banking_universal.repositories.entities
 
 import jakarta.persistence.*
+import org.hibernate.annotations.UuidGenerator
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 import java.time.Instant
 
 @Entity
-@Table(name = "sessions", indexes = [
-  Index(name = "idx_session_user_id", columnList = "user_id")
-])
+@Table(
+  name = "sessions", indexes = [
+    Index(name = "idx_session_user_id", columnList = "user_id")
+  ]
+)
 class SessionEntity(
   @Column(name = "access_token")
   val accessToken: String,
@@ -20,8 +25,8 @@ class SessionEntity(
   val userId: UserEntity
 ) {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long? = null
+  @UuidGenerator
+  var id: String? = null
 
   @Column(name = "create_date", nullable = false)
   var createDate: Instant? = null
@@ -41,7 +46,10 @@ class SessionEntity(
   }
 }
 
-interface SessionEntityRepository : JpaRepository<SessionEntity, Long> {
-  fun findByUserId(userId: UserEntity): SessionEntity
-  fun deleteByUserId(userId: UserEntity): Long
+interface SessionEntityRepository : JpaRepository<SessionEntity, String> {
+  fun findByUserId(userId: UserEntity): SessionEntity?
+
+  @Modifying
+  @Query("DELETE FROM SessionEntity s WHERE s.userId = :userId")
+  fun deleteByUserId(userId: UserEntity): Int
 }

@@ -9,6 +9,8 @@ import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.server.WebGraphQlRequest
 import org.springframework.stereotype.Controller
+import graphql.schema.DataFetchingEnvironment
+import org.springframework.util.MultiValueMap
 
 @Controller
 class UserController(
@@ -28,12 +30,17 @@ class UserController(
   @MutationMapping(name = "logoutUser")
   fun logoutUser(
     @Argument("userId") userId: Int,
-    webGraphQlRequest: WebGraphQlRequest
-  ): String{
-    println(webGraphQlRequest.headers)
-    val authorization = webGraphQlRequest.headers.getFirst("Authorization");
-    if(authorization == null){
-      throw IllegalArgumentException("Not Authorized")
+    environment: DataFetchingEnvironment
+  ): String {
+    println(userId.toString() + "printing user id in here")
+    println("$userId printing user id in here")
+
+    // 1. Retrieve the headers from the GraphQLContext
+    val headers: MultiValueMap<String, String> = environment.graphQlContext.get("headers")
+      ?: throw IllegalStateException("HTTP headers not found in GraphQL context.")
+    val authorization = headers.getFirst("Authorization");
+    if (authorization.isNullOrBlank()) {
+      throw IllegalArgumentException("Not Authorized to logout")
     }
 
     return this.userService.logoutUser(userId.toLong(), authorization);

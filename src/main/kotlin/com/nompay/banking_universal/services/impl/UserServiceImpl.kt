@@ -11,10 +11,10 @@ import com.nompay.banking_universal.repositories.entities.UserEntityRepository
 import com.nompay.banking_universal.services.UserService
 import com.nompay.banking_universal.utils.SessionService
 import com.nompay.banking_universal.utils.impl.PasswordServiceImpl
-import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.sql.Date
 
 @Service
@@ -55,7 +55,7 @@ class UserServiceImpl(
   @Transactional
   override fun logoutUser(userId: Long, accessToken: String): String { // In case we incorrectly delete the access token...
     val authorizationCheck = this.sessionService.checkTokenValidity((accessToken));
-
+    println("logout has reached the service implementaiton in here,...")
     if(!authorizationCheck){
       throw JWTVerificationException("User Unauthorized")
     }
