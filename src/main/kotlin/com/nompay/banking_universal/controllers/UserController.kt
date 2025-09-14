@@ -7,7 +7,6 @@ import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.services.UserService
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
-import org.springframework.graphql.server.WebGraphQlRequest
 import org.springframework.stereotype.Controller
 import graphql.schema.DataFetchingEnvironment
 import org.springframework.util.MultiValueMap
@@ -32,10 +31,8 @@ class UserController(
     @Argument("userId") userId: Int,
     environment: DataFetchingEnvironment
   ): String {
-    println(userId.toString() + "printing user id in here")
-    println("$userId printing user id in here")
 
-    // 1. Retrieve the headers from the GraphQLContext
+    // Retrieve the headers from the GraphQLContext
     val headers: MultiValueMap<String, String> = environment.graphQlContext.get("headers")
       ?: throw IllegalStateException("HTTP headers not found in GraphQL context.")
     val authorization = headers.getFirst("Authorization");

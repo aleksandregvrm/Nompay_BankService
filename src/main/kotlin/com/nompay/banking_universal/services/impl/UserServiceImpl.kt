@@ -8,6 +8,7 @@ import com.nompay.banking_universal.repositories.dto.user.UpdateUserDto
 import com.nompay.banking_universal.repositories.entities.SessionEntityRepository
 import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
+import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import com.nompay.banking_universal.services.UserService
 import com.nompay.banking_universal.utils.SessionService
 import com.nompay.banking_universal.utils.impl.PasswordServiceImpl
@@ -42,10 +43,17 @@ class UserServiceImpl(
       } catch (e: RuntimeException) {
         throw RuntimeException("Password hashing has failed")
       } // Hashing password validation for runtime purposes...
+      this.role = UserRoles.USER // By Default we assign a role of user to the Registered User.
     }
     userRepository.save(user); // Saving the user to the databse
     println(user.toString())
     return user;
+  }
+
+  // Internal function that looks for the user based on the userId
+  private fun getUserByUserId(userId: Long): UserEntity {
+    return this.userRepository.findById(userId)
+      .orElse(throw IllegalArgumentException("No such user with user id - " + userId))
   }
 
   override fun updateUser(updateUserDto: UpdateUserDto): String {
@@ -53,10 +61,15 @@ class UserServiceImpl(
   }
 
   @Transactional
-  override fun logoutUser(userId: Long, accessToken: String): String { // In case we incorrectly delete the access token...
+  override fun logoutUser(
+    userId: Long,
+    accessToken: String
+  ): String { // In case we incorrectly delete the access token...
+    val availableUserSession =
+      this.getUserByUserId(userId);
+
     val authorizationCheck = this.sessionService.checkTokenValidity((accessToken));
-    println("logout has reached the service implementaiton in here,...")
-    if(!authorizationCheck){
+    if (!authorizationCheck) {
       throw JWTVerificationException("User Unauthorized")
     }
     // Check if the user is empty if is it is assigned the null value.
@@ -65,7 +78,6 @@ class UserServiceImpl(
     try {
       sessionRepository.deleteByUserId(user)
     } catch (e: DataIntegrityViolationException) {
-      println(e.message)
       throw e
     }
     return "User logged out."
@@ -86,7 +98,7 @@ class UserServiceImpl(
 
     val activeSession = sessionRepository.findByUserId(user);
 
-    if(activeSession != null){
+    if (activeSession != null) {
       throw IllegalArgumentException("User is already logged in")
     }
 

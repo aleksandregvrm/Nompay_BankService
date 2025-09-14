@@ -29,11 +29,12 @@ input UpdateAccountInput {
 
 # Query for transferring funds from one account to another
 input TransferFundsInput {
+    amount: Int!
     currency: Currencies!
-    emailFrom: String
-    emailTo: String
-    accountFromId: String
-    accountToId: String
+    fromEmail: String
+    toEmail: String
+    fromAccountNumber: String!
+    toAccountNumber: String!
 }
 
 type Account {

@@ -1,5 +1,6 @@
 package com.nompay.banking_universal.repositories.entities
 
+import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import jakarta.persistence.*
 import org.springframework.data.jpa.repository.JpaRepository
 import java.sql.Date
@@ -43,6 +44,10 @@ class UserEntity(
 
   @Column(name = "update_date")
   var updateDate: Instant? = null
+
+  @Column(name = "role")
+  @Enumerated(EnumType.STRING)
+  var role: UserRoles? = null;
 
   @OneToMany(mappedBy = "ownerUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   var accounts: MutableSet<AccountEntity> = mutableSetOf()

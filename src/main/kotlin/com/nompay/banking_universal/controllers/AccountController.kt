@@ -1,6 +1,7 @@
 package com.nompay.banking_universal.controllers
 
 import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
+import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.services.impl.AccountServiceImpl
 import org.springframework.graphql.data.method.annotation.Argument
@@ -13,8 +14,12 @@ class AccountController(
 ) {
 
   @MutationMapping(name = "createAccount")
-  fun createAccount(@Argument("input") input: CreateAccountDto): AccountEntity{
-    throw RuntimeException("asdsd")
+  fun createAccount(@Argument("input") input: CreateAccountDto): AccountEntity {
+    return this.accountService.createAccount(input);
   }
 
+  @MutationMapping(name = "")
+  fun transferFund(@Argument("input") input: TransferFundsDto): String {
+    return "returning the transfered funds in here..."
+  }
 }

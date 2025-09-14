@@ -15,10 +15,10 @@ type User {
     id: Int!
     email: String!
     username: String!
-    password: String!
     name: String!
     surname: String!
     createDate: String!
+    role: String!
 }
 
 input CreateUserInput {

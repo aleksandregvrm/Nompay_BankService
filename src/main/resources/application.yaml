@@ -23,7 +23,7 @@ spring:
 logging:
   level:
     org:
-      springframework: info
+      springframework: info #Insert debug for debugging mode
 service:
   signingSecret: ${SIGNING_SECRET}
   tokenValidity: ${TOKEN_VALIDITY}
