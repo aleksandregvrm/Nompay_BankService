@@ -8,9 +8,12 @@ import java.math.BigDecimal
 
 
 @Entity
-@Table(name = "account", indexes = [
-  Index(name = "idx_account_email", columnList = "email")
-])
+@Table(
+  name = "account", indexes = [
+    Index(name = "idx_account_email", columnList = "email"),
+    Index(name = "idx_bank_account", columnList = "iban")
+  ]
+)
 class AccountEntity(
   @Column(name = "email", nullable = false)
   var email: String,
@@ -23,8 +26,13 @@ class AccountEntity(
   var currency: Currencies,
 
   @Column(name = "iban", nullable = false)
-  val iban: String
-  ) {
+  val iban: String,
+
+  @ManyToOne
+  @JoinColumn(name = "owner_user_id")
+  @JsonIgnore
+  val ownerUser: UserEntity
+) {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null
@@ -32,15 +40,12 @@ class AccountEntity(
   @Column(name = "balance", nullable = false, columnDefinition = "DECIMAL(19,2) DEFAULT 0")
   var balance: BigDecimal = BigDecimal.ZERO
 
-  @ManyToOne
-  @JoinColumn(name = "owner_user_id")
-  @JsonIgnore
-  lateinit var ownerUser: UserEntity
   override fun toString(): String {
     return "AccountEntity(email='$email', name='$name', currency=$currency, iban='$iban', id=$id, balance=$balance, ownerUser=$ownerUser)"
   }
 }
 
 interface AccountEntityRepository : JpaRepository<AccountEntity, Long> {
-  fun getAccountByEmail(email: String): AccountEntity
+  fun getAccountByEmail(email: String): AccountEntity?
+  fun getAccountByIban(iban: String): AccountEntity?
 }

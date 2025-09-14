@@ -10,7 +10,8 @@ data class CreateAccountDto(
   @field:Email(message = "Email must be a valid email address")
   val email: String,
 
-  val name: String?,
+  @field:NotBlank(message = "Name is required")
+  val name: String,
 
   @field:NotNull("Please provide the currency")
   val currency: Currencies
