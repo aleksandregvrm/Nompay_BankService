@@ -47,10 +47,10 @@ class IBANServiceImpl(
     toEmail: String,
     currency: Currencies
   ): Pair<AccountEntity, AccountEntity> {
-    val fromEmailAccount: AccountEntity? = this.accountEntity.getAccountByEmail(fromEmail)
+    val fromEmailAccount: AccountEntity? = this.accountEntity.getAccountByEmail(fromEmail)?.firstOrNull()
       ?: throw BadRequestException("From email account not found")
 
-    val toEmailAccount: AccountEntity? = this.accountEntity.getAccountByEmail(toEmail)
+    val toEmailAccount: AccountEntity? = this.accountEntity.getAccountByEmail(toEmail)?.firstOrNull()
       ?: throw BadRequestException("From email account not found")
 
     return Pair(fromEmailAccount!!, toEmailAccount!!)

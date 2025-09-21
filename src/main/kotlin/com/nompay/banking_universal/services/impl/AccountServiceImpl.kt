@@ -41,6 +41,44 @@ class AccountServiceImpl(
 
   @Transactional
   override fun transferFunds(transferFundsDto: TransferFundsDto): String {
-    TODO("Not yet implemented")
+    val (amount, currency, fromEmail, toEmail, fromAccountNumber, toAccountNumber) = transferFundsDto
+
+    // Retrieving the correct Account and if the email is used retrieve the first account with that email
+    val fromAccount: AccountEntity = when {
+      !fromAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(fromAccountNumber)
+      !fromEmail.isNullOrBlank() && currency != null -> {
+        this.accountRepository.getAccountByEmail(fromEmail)?.firstOrNull { it.currency == currency }
+      }
+      else -> throw IllegalArgumentException("Source account details are required.")
+    } ?: throw IllegalStateException("Source account not found.")
+
+    // Retrieving the correct to Account and if the email is used retrieve the first account with that email
+    val toAccount: AccountEntity = when {
+      !toAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(toAccountNumber)
+      !toEmail.isNullOrBlank() && currency != null -> {
+        this.accountRepository.getAccountByEmail(toEmail)?.firstOrNull { it.currency == currency }
+      }
+      else -> throw IllegalArgumentException("Destination account details are required.")
+    } ?: throw IllegalStateException("Destination account not found.")
+
+    if (fromAccount.currency != toAccount.currency) {
+      throw IllegalStateException("Currency mismatch. Conversions are not supported.")
+    }
+
+    if (fromAccount.id == toAccount.id) {
+      throw IllegalStateException("Cannot transfer funds to the same account.")
+    }
+
+    if (fromAccount.balance.compareTo(amount) < 0) {
+      throw IllegalStateException("Insufficient balance.")
+    }
+
+    fromAccount.balance = fromAccount.balance.subtract(amount)
+    toAccount.balance = toAccount.balance.add(amount)
+
+    this.accountRepository.save(fromAccount)
+    this.accountRepository.save(toAccount)
+
+    return "Funds transferred successfully."
   }
 }

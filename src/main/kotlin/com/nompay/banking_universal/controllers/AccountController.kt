@@ -31,11 +31,20 @@ class AccountController(
     return this.accountService.createAccount(input);
   }
 
-  @MutationMapping(name = "")
+  @MutationMapping(name = "transferFunds")
   fun transferFund(
     @Argument("input") input: TransferFundsDto,
     environment: DataFetchingEnvironment
   ): String {
+    val headers: MultiValueMap<String, String> = environment.graphQlContext.get("headers")
+      ?: throw IllegalStateException("HTTP headers not found in GraphQL context.")
+
+    val authorization = headers.getFirst("Authorization");
+
+    if (authorization.isNullOrBlank()) {
+      throw IllegalArgumentException("Not Authorized to create account")
+    }
+
     return "returning the transfered funds in here..."
   }
 }

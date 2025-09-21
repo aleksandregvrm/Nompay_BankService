@@ -21,11 +21,9 @@ data class TransferFundsDto(
 
   val toEmail: String?,
 
-  @field:NotBlank(message = "Please provide your account number")
-  val fromAccountNumber: Long, // Meaning IBAN
+  val fromAccountNumber: String?, // Meaning IBAN
 
-  @field:NotBlank(message = "Please provide clients account number")
-  val toAccountNumber: Long
+  val toAccountNumber: String?
 
 
 )

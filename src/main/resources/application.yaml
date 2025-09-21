@@ -28,3 +28,5 @@ service:
   signingSecret: ${SIGNING_SECRET}
   tokenValidity: ${TOKEN_VALIDITY}
   tokenSecret: ${TOKEN_SECRET}
+  fastForexApiKey: ${FAST_FOREX_API_KEY}
+  fastForexBaseUrl: ${FOREX_SERVICE_BASE_URL}

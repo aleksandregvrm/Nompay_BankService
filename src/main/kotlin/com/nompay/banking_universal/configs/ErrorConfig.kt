@@ -24,6 +24,14 @@ class ErrorConfig {
   }
 
   @GraphQlExceptionHandler
+  fun handleIllegalState(ex: IllegalStateException): GraphQLError {
+    return GraphqlErrorBuilder.newError()
+      .message("Invalid input: " + ex.message)
+      .errorType(ErrorType.BAD_REQUEST)
+      .build()
+  }
+
+  @GraphQlExceptionHandler
   fun handleValidationException(ex: ValidationException): GraphQLError {
     return GraphqlErrorBuilder.newError()
       .message("Validation error: " + ex.message)
