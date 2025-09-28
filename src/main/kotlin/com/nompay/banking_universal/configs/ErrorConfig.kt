@@ -85,4 +85,12 @@ class ErrorConfig {
       .errorType(ErrorType.UNAUTHORIZED)
       .build()
   }
+
+  @GraphQlExceptionHandler
+  fun securityException (ex: SecurityException): GraphQLError {
+    return GraphqlErrorBuilder.newError()
+      .message("Unauthorized: " + ex.message)
+      .errorType(ErrorType.UNAUTHORIZED)
+      .build()
+  }
 }

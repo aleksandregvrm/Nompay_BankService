@@ -12,6 +12,7 @@ import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import com.nompay.banking_universal.services.UserService
 import com.nompay.banking_universal.utils.SessionService
 import com.nompay.banking_universal.utils.impl.PasswordServiceImpl
+import org.apache.coyote.BadRequestException
 import org.springframework.context.annotation.Lazy
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
@@ -23,11 +24,11 @@ class UserServiceImpl(
 
   @Lazy private val passwordService: PasswordServiceImpl,
 
-  @Lazy private val sessionService: SessionService,
+  private val sessionService: SessionService,
 
   private val userRepository: UserEntityRepository,
 
-  @Lazy private val sessionRepository: SessionEntityRepository
+  private val sessionRepository: SessionEntityRepository
 ) : UserService {
 
   override fun createUser(createUserDto: CreateUserDto): UserEntity {
@@ -51,9 +52,9 @@ class UserServiceImpl(
   }
 
   // Internal function that looks for the user based on the userId
-  private fun getUserByUserId(userId: Long): UserEntity {
-    return this.userRepository.findById(userId)
-      .orElse(throw IllegalArgumentException("No such user with user id - " + userId))
+  private fun getUserByUserId(userId: Long): UserEntity? {
+    val user: UserEntity? = userRepository.findById(userId).orElse(null);
+    return user
   }
 
   override fun updateUser(updateUserDto: UpdateUserDto): String {
@@ -63,24 +64,24 @@ class UserServiceImpl(
   @Transactional
   override fun logoutUser(
     userId: Long,
-    accessToken: String
   ): String { // In case we incorrectly delete the access token...
     val availableUserSession =
       this.getUserByUserId(userId);
 
-    val authorizationCheck = this.sessionService.checkTokenValidity((accessToken));
-    if (!authorizationCheck) {
-      throw JWTVerificationException("User Unauthorized")
+    if (availableUserSession == null) { // Writing comparison manually and null inline null validation fails.
+      throw BadRequestException("User with user id - ${userId} Not found.")
     }
-    // Check if the user is empty if is it is assigned the null value.
-    val user = userRepository.findById(userId).orElse(null) ?: throw IllegalArgumentException("no such user Id exists");
 
+    val userSession = this.sessionRepository.findByUserId(availableUserSession);
+    if (userSession == null) {
+      throw BadRequestException("User with user id - ${userId} is not active.")
+    }
     try {
-      sessionRepository.deleteByUserId(user)
+      sessionRepository.deleteByUserId(availableUserSession)
+      return "User logged out."
     } catch (e: DataIntegrityViolationException) {
       throw e
     }
-    return "User logged out."
   }
 
   override fun loginUser(loginUserDto: LoginUserDto): LoginUserReturnDto {

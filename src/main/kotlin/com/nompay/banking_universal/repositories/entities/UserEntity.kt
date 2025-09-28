@@ -68,7 +68,14 @@ class UserEntity(
   }
 
   override fun toString(): String {
-    return "UserEntity(email='$email', name='$name', username='$username', birthDate=$birthDate, id=$id, createDate=$createDate, password='$password', updateDate=$updateDate, accounts=$accounts)"
+    return "UserEntity(" +
+        "email='$email', " +
+        "name='$name', " +
+        "username='$username', " +
+        "birthDate=$birthDate, " +
+        "id=$id, " +
+        "createDate=$createDate, " +
+        "updateDate=$updateDate)" // Accounts are removed here
   }
 }
 

@@ -3,6 +3,7 @@ package com.nompay.banking_universal.utils.impl
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
+import com.auth0.jwt.interfaces.DecodedJWT
 import com.nompay.banking_universal.repositories.entities.SessionEntity
 import com.nompay.banking_universal.repositories.entities.SessionEntityRepository
 import com.nompay.banking_universal.repositories.entities.UserEntity
@@ -27,13 +28,16 @@ class SessionServiceImpl(
 ) : SessionService {
 
 
-  override fun checkTokenValidity(token: String): Boolean {
+  // Here we validate the token and check whether that token belongs to the username requesting it.
+  override fun checkTokenValidity(token: String, userId: Long): Boolean {
     return try {
       val verifier = JWT.require(Algorithm.HMAC256(this.tokenSecret))
         .withIssuer(this.sessionGiverOrganization)
         .build()
-      verifier.verify(token);
-      true
+      val decodedJwt = verifier.verify(token);
+//      val checkForRole = this.checkUserRole(decodedJwt)
+      val tokenUserId = decodedJwt.subject;
+      tokenUserId.equals(userId.toString(), ignoreCase = true)
     } catch (e: JWTVerificationException) {
       println(e.message)
       false
@@ -47,9 +51,9 @@ class SessionServiceImpl(
    * @return
    * **/
   override fun generateSession(user: UserEntity): Pair<String, String> {
-    val accessToken = this.generateToken(user.username, Integer.parseInt(tokenValidityHours))
+    val accessToken = this.generateToken(user.id!!, Integer.parseInt(tokenValidityHours))
 
-    val refreshToken = this.generateToken(user.username, Integer.parseInt(tokenValidityHours) * 24 * 30)
+    val refreshToken = this.generateToken(user.id!!, Integer.parseInt(tokenValidityHours) * 24 * 30)
 
     val session = SessionEntity(
       accessToken = accessToken,
@@ -60,18 +64,18 @@ class SessionServiceImpl(
     return Pair(accessToken, refreshToken)
   }
 
-  override fun generateToken(subject: String, validityHours: Int): String {
+  override fun generateToken(userId: Long, validityHours: Int): String {
     val now = UtilDate()
     val expiration = UtilDate(now.time + validityHours * 360000);
     return JWT.create()
       .withIssuer(this.sessionGiverOrganization)
-      .withSubject(subject)
+      .withSubject(userId.toString())
       .withClaim("role", UserRoles.USER.name)
       .withExpiresAt(expiration)
       .sign(Algorithm.HMAC256(this.tokenSecret))
   }
 
-  override fun checkUserRole(userData: HashMap<String, Any>): UserRoles {
-    TODO("Not yet implemented")
+  private fun checkUserRole(userData: DecodedJWT): UserRoles {
+    TODO()
   }
 }

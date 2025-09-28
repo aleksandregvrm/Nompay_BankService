@@ -7,6 +7,7 @@ import com.nompay.banking_universal.repositories.entities.AccountEntityRepositor
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
 import com.nompay.banking_universal.services.AccountService
 import com.nompay.banking_universal.utils.impl.IBANServiceImpl
+import com.nompay.banking_universal.utils.impl.SessionServiceImpl
 import org.apache.coyote.BadRequestException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,12 +19,26 @@ class AccountServiceImpl(
 
   private val accountRepository: AccountEntityRepository,
 
-  private val userRepository: UserEntityRepository
+  private val userRepository: UserEntityRepository,
+
+  private val sessionService: SessionServiceImpl
 ) : AccountService {
 
   override fun createAccount(createAccountDto: CreateAccountDto): AccountEntity {
     val ownerUser = userRepository.findUserByEmailIgnoreCase(createAccountDto.email)
       ?: throw BadRequestException("No User with such email found");
+    val userAccounts = accountRepository.getAccountsByEmail(createAccountDto.email);
+
+    if (!userAccounts.isNullOrEmpty()) {
+      val sameAccountForCurrency = userAccounts.filter { it.currency == createAccountDto.currency };
+      if (sameAccountForCurrency.size > 2) {
+        throw IllegalArgumentException(
+          "Cannot create three accounts with the " +
+              "same currency of ${createAccountDto.currency}"
+        )
+      }
+    }
+
     val account = AccountEntity(
       email = createAccountDto.email,
       name = createAccountDto.name,
@@ -47,8 +62,9 @@ class AccountServiceImpl(
     val fromAccount: AccountEntity = when {
       !fromAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(fromAccountNumber)
       !fromEmail.isNullOrBlank() && currency != null -> {
-        this.accountRepository.getAccountByEmail(fromEmail)?.firstOrNull { it.currency == currency }
+        this.accountRepository.getAccountsByEmail(fromEmail)?.firstOrNull { it.currency == currency }
       }
+
       else -> throw IllegalArgumentException("Source account details are required.")
     } ?: throw IllegalStateException("Source account not found.")
 
@@ -56,8 +72,9 @@ class AccountServiceImpl(
     val toAccount: AccountEntity = when {
       !toAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(toAccountNumber)
       !toEmail.isNullOrBlank() && currency != null -> {
-        this.accountRepository.getAccountByEmail(toEmail)?.firstOrNull { it.currency == currency }
+        this.accountRepository.getAccountsByEmail(toEmail)?.firstOrNull { it.currency == currency }
       }
+
       else -> throw IllegalArgumentException("Destination account details are required.")
     } ?: throw IllegalStateException("Destination account not found.")
 

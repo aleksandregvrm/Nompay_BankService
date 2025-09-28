@@ -1,5 +1,6 @@
 package com.nompay.banking_universal.controllers
 
+import com.nompay.banking_universal.annotations.auth.RequiresAuth
 import com.nompay.banking_universal.repositories.dto.user.CreateUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserReturnDto
@@ -27,19 +28,11 @@ class UserController(
   }
 
   @MutationMapping(name = "logoutUser")
+  @RequiresAuth
   fun logoutUser(
     @Argument("userId") userId: Int,
     environment: DataFetchingEnvironment
   ): String {
-
-    // Retrieve the headers from the GraphQLContext
-    val headers: MultiValueMap<String, String> = environment.graphQlContext.get("headers")
-      ?: throw IllegalStateException("HTTP headers not found in GraphQL context.")
-    val authorization = headers.getFirst("Authorization");
-    if (authorization.isNullOrBlank()) {
-      throw IllegalArgumentException("Not Authorized to logout")
-    }
-
-    return this.userService.logoutUser(userId.toLong(), authorization);
+    return this.userService.logoutUser(userId.toLong());
   }
 }

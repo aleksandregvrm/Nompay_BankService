@@ -3,10 +3,10 @@ extend type Query {
 }
 
 extend type Mutation {
-    createAccount(input: CreateAccountInput!): Account
-    updateAccount(input: UpdateAccountInput!): Account
-    transferFunds(input: TransferFundsInput!): String
-    reverseFunds(input: TransferFundsInput!): String
+    createAccount(userId: Int!, input: CreateAccountInput!): Account
+    updateAccount(userId: Int!, input: UpdateAccountInput!): Account
+    transferFunds(userId: Int!, input: TransferFundsInput!): String
+    reverseFunds(userId: Int!, input: TransferFundsInput!): String
 }
 
 enum Currencies {
@@ -23,6 +23,7 @@ input CreateAccountInput {
 }
 
 input UpdateAccountInput {
+    userId: Int!
     email: String!
     name: String!
 }
