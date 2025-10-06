@@ -8,7 +8,7 @@ enum class Currencies(val code: String, val symbol: String) {
 
   companion object {
 
-    // Validating Whether incomin currency exists...
+    // Validating Whether incoming currency exists...
     fun checkForCurrency(candidateCurrency: String): Boolean {
       return entries.find { it.code.equals(candidateCurrency, ignoreCase = true) }?.code.toBoolean()
     }

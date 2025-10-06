@@ -1,7 +1,9 @@
 package com.nompay.banking_universal.services.impl
 
 import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
+import com.nompay.banking_universal.repositories.dto.account.FindAccountsToTransferDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
+import com.nompay.banking_universal.repositories.dto.account.TransferFundsInternallyDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.AccountEntityRepository
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
@@ -54,9 +56,13 @@ class AccountServiceImpl(
     return account
   }
 
+  override fun findAccountsToTransfer(findAccountsToTransferDto: FindAccountsToTransferDto): List<AccountEntity> {
+    TODO("Not yet implemented")
+  }
+
   @Transactional
   override fun transferFunds(transferFundsDto: TransferFundsDto): String {
-    val (amount, currency, fromEmail, toEmail, fromAccountNumber, toAccountNumber) = transferFundsDto
+    val (amount, currency, fromEmail, toEmail, fromAccountNumber, toAccountNumber, transferDescription ) = transferFundsDto
 
     // Retrieving the correct Account and if the email is used retrieve the first account with that email
     val fromAccount: AccountEntity = when {
@@ -97,5 +103,13 @@ class AccountServiceImpl(
     this.accountRepository.save(toAccount)
 
     return "Funds transferred successfully."
+  }
+
+  override fun transferFundsInternally(transferFundInternallyDto: TransferFundsInternallyDto): String {
+    TODO("Not yet implemented")
+  }
+
+  override fun transferFundsInternallyWithDiffCurrency(): String {
+    TODO("Not yet implemented")
   }
 }

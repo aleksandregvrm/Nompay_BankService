@@ -36,6 +36,7 @@ input TransferFundsInput {
     toEmail: String
     fromAccountNumber: String
     toAccountNumber: String
+    transferDescription: String
 }
 
 type Account {
