@@ -52,6 +52,12 @@ class UserEntity(
   @OneToMany(mappedBy = "ownerUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   var accounts: MutableSet<AccountEntity> = mutableSetOf()
 
+  @OneToMany(mappedBy = "fromUserId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var transactions: MutableList<TransactionEntity> = mutableListOf()
+
+  @OneToMany(mappedBy = "toUserId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var receivedTransactions: MutableList<TransactionEntity> = mutableListOf()
+
   @OneToOne(mappedBy = "userId", cascade = [CascadeType.ALL], orphanRemoval = true)
   val sessionId: SessionEntity? = null
 

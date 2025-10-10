@@ -33,6 +33,13 @@ class AccountEntity(
   @JsonIgnore
   val ownerUser: UserEntity
 ) {
+
+  @OneToMany(mappedBy = "fromAccountId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var transactions: MutableList<TransactionEntity> = mutableListOf()
+
+  @OneToMany(mappedBy = "toAccountId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var receivedTransactions: MutableList<TransactionEntity> = mutableListOf()
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null

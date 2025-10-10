@@ -9,7 +9,7 @@ data class LoginUserReturnDto(
   val email: String?,
   val timeStamp: Date
 ) {
-  class Builder {w
+  class Builder {
     private var refreshToken: String? = null
     private var accessToken: String? = null
     private var username: String? = null

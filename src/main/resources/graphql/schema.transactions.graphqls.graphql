@@ -1,0 +1,30 @@
+extend type Query {
+    retrieveOneTransaction(userId: String!, transactionId: String!): Transaction
+    retrieveAllUserTransactions(userId: String!): [Transaction]
+    retryTransaction(transactionId: String!): Transaction
+}
+
+extend type Mutation {
+
+}
+
+enum TransactionStatuses {
+    CREATED,
+    SUCCESS,
+    FAILED,
+    PENDING
+}
+
+type Transaction {
+    id: Int!
+    transactionId: String!
+    fromUserId: Int!
+    toUserId: Int!
+    fromEmail: String!
+    toEmail: String!
+    fromAccountId: String!
+    toAccountId: String!
+    currency: Currencies!
+    amount: Int!
+    status: TransactionStatuses!
+}
