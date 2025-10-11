@@ -4,16 +4,22 @@ import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
 import com.nompay.banking_universal.repositories.dto.account.FindAccountsToTransferDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsInternallyDto
+import com.nompay.banking_universal.repositories.dto.transactions.CreateTransactionDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.AccountEntityRepository
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
+import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
 import com.nompay.banking_universal.services.AccountService
 import com.nompay.banking_universal.utils.impl.IBANServiceImpl
 import com.nompay.banking_universal.utils.impl.SessionServiceImpl
 import org.apache.coyote.BadRequestException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.util.UUID
 
 @Service
 class AccountServiceImpl(
@@ -23,7 +29,11 @@ class AccountServiceImpl(
 
   private val userRepository: UserEntityRepository,
 
-  private val sessionService: SessionServiceImpl
+  private val sessionService: SessionServiceImpl,
+
+  @Lazy private val transactionService: TransactionServiceImpl,
+
+  private val logger: Logger = LoggerFactory.getLogger(AccountServiceImpl::class.java)
 ) : AccountService {
 
   override fun createAccount(createAccountDto: CreateAccountDto): AccountEntity {
@@ -34,6 +44,8 @@ class AccountServiceImpl(
     if (!userAccounts.isNullOrEmpty()) {
       val sameAccountForCurrency = userAccounts.filter { it.currency == createAccountDto.currency };
       if (sameAccountForCurrency.size > 2) {
+        logger.error("Cannot create three accounts with the " +
+            "same currency of ${createAccountDto.currency}")
         throw IllegalArgumentException(
           "Cannot create three accounts with the " +
               "same currency of ${createAccountDto.currency}"
@@ -85,14 +97,17 @@ class AccountServiceImpl(
     } ?: throw IllegalStateException("Destination account not found.")
 
     if (fromAccount.currency != toAccount.currency) {
+      logger.error("Currency mismatch. Conversions are not supported.")
       throw IllegalStateException("Currency mismatch. Conversions are not supported.")
     }
 
     if (fromAccount.id == toAccount.id) {
+      logger.error("Cannot transfer funds to the same account.")
       throw IllegalStateException("Cannot transfer funds to the same account.")
     }
 
     if (fromAccount.balance.compareTo(amount) < 0) {
+      logger.error("Insufficient balance.")
       throw IllegalStateException("Insufficient balance.")
     }
 
@@ -102,6 +117,19 @@ class AccountServiceImpl(
     this.accountRepository.save(fromAccount)
     this.accountRepository.save(toAccount)
 
+    val transaction = CreateTransactionDto.Builder()
+      .withFromUser(fromAccount.ownerUser)
+      .withToUser(fromAccount.ownerUser)
+      .withFromEmail(fromAccount.email)
+      .withToEmail(toAccount.email)
+      .withFromAccount(fromAccount)
+      .withToAccount(toAccount)
+      .withTransactionId(UUID.randomUUID().toString())
+      .withCurrency(currency)
+      .withAmount(amount)
+      .withStatus(TransactionStatuses.SUCCESS)
+      .build()
+    this.transactionService.createTransaction(transaction)
     return "Funds transferred successfully."
   }
 

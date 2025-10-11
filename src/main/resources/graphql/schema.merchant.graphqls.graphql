@@ -1,0 +1,64 @@
+extend type Query {
+    getMerchant(userId: Int!): Merchant!
+    getAllMerchants(userId: Int!): Merchant!
+}
+
+extend type Mutation {
+    createMerchant(userId: Int!, input: CreateMerchantInput): Merchant!
+    addUserMerchant(userId: Int!, userToAddId: Int): String!
+    editMerchant(userId: Int!, input: EditMerchantInput): Merchant!
+}
+# Inputs
+input CreateMerchantInput {
+    ownerUserId: Int!
+    accessorUsers: [Int]!
+    legalName: String!
+    email: String!
+    billing: MerchantBillingInput!
+}
+
+input MerchantBillingInput {
+    address: String!
+    city: String!
+    country: String!
+    postalCode: String!
+    director: String!
+    primaryPhone: String!
+}
+
+input EditMerchantInput {
+    merchantId: String!
+    email: String
+    deleteAccessorUser: Int
+    billing: MerchantBillingInput
+}
+
+# Enums
+enum MerchantStatus {
+    CREATED,
+    ACTIVE,
+    DELETED,
+    SUSPENDED
+}
+
+# Types
+type Merchant {
+    ownerUser: User!
+    accessorUsers: [User]!
+    merchantId: String!
+    merchantAccount: [Account]
+    legalName: String!
+    status: MerchantStatus!
+    createdAt: String!
+    email: String!
+    billing: MerchantBilling
+}
+
+type MerchantBilling {
+    address: String!
+    city: String!
+    country: String!
+    postalCode: String!
+    director: String!
+    primaryPhone: String!
+}

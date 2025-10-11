@@ -1,40 +1,42 @@
 package com.nompay.banking_universal.repositories.dto.transactions
 
+import com.nompay.banking_universal.repositories.entities.AccountEntity
+import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.repositories.enums.Currencies
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
 import java.math.BigDecimal
 
 data class CreateTransactionDto(
-  val fromUserId: Long,
-  val toUserId: Long,
-  val fromEmail: Long,
-  val toEmail: Long,
-  val fromAccountId: Long,
-  val toAccountId: Long,
+  val fromUser: UserEntity,
+  val toUser: UserEntity,
+  val fromEmail: String,
+  val toEmail: String,
+  val fromAccount: AccountEntity,
+  val toAccount: AccountEntity,
   val transactionId: String,
   val currency: Currencies,
   val amount: BigDecimal,
   val status: TransactionStatuses
 ) {
   class Builder {
-    private var fromUserId: Long? = null
-    private var toUserId: Long? = null
-    private var fromEmail: Long? = null
-    private var toEmail: Long? = null
-    private var fromAccountId: Long? = null
-    private var toAccountId: Long? = null
+    private var fromUser: UserEntity? = null
+    private var toUser: UserEntity? = null
+    private var fromEmail: String? = null
+    private var toEmail: String? = null
+    private var fromAccount: AccountEntity? = null
+    private var toAccount: AccountEntity? = null
     private var transactionId: String? = null
     private var currency: Currencies? = null
     private var amount: BigDecimal? = null
     private var status: TransactionStatuses? = TransactionStatuses.PENDING // Example default status
 
     // Setter methods (withers) for fluent chaining
-    fun withFromUserId(fromUserId: Long) = apply { this.fromUserId = fromUserId }
-    fun withToUserId(toUserId: Long) = apply { this.toUserId = toUserId }
-    fun withFromEmail(fromEmail: Long) = apply { this.fromEmail = fromEmail }
-    fun withToEmail(toEmail: Long) = apply { this.toEmail = toEmail }
-    fun withFromAccountId(fromAccountId: Long) = apply { this.fromAccountId = fromAccountId }
-    fun toAccountId(toAccountId: Long) = apply { this.toAccountId = toAccountId }
+    fun withFromUser(fromUser: UserEntity) = apply { this.fromUser = fromUser }
+    fun withToUser(toUser: UserEntity) = apply { this.toUser = toUser }
+    fun withFromEmail(fromEmail: String) = apply { this.fromEmail = fromEmail }
+    fun withToEmail(toEmail: String) = apply { this.toEmail = toEmail }
+    fun withFromAccount(fromAccount: AccountEntity) = apply { this.fromAccount = fromAccount }
+    fun withToAccount(toAccount: AccountEntity) = apply { this.toAccount = toAccount }
     fun withTransactionId(transactionId: String) = apply { this.transactionId = transactionId }
     fun withCurrency(currency: Currencies) = apply { this.currency = currency }
     fun withAmount(amount: BigDecimal) = apply { this.amount = amount }
@@ -42,12 +44,12 @@ data class CreateTransactionDto(
 
     fun build(): CreateTransactionDto {
       return CreateTransactionDto(
-        fromUserId = fromUserId!!,
-        toUserId = toUserId!!,
+        fromUser = fromUser!!,
+        toUser = toUser!!,
         fromEmail = fromEmail!!,
         toEmail = toEmail!!,
-        fromAccountId = fromAccountId!!,
-        toAccountId = toAccountId!!,
+        fromAccount = fromAccount!!,
+        toAccount = toAccount!!,
         transactionId = transactionId!!,
         currency = currency!!,
         amount = amount!!,

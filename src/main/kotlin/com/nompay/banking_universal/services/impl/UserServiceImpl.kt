@@ -47,12 +47,11 @@ class UserServiceImpl(
       this.role = UserRoles.USER // By Default we assign a role of user to the Registered User.
     }
     userRepository.save(user); // Saving the user to the databse
-    println(user.toString())
     return user;
   }
 
   // Internal function that looks for the user based on the userId
-  private fun getUserByUserId(userId: Long): UserEntity? {
+  fun getUserByUserId(userId: Long): UserEntity? {
     val user: UserEntity? = userRepository.findById(userId).orElse(null);
     return user
   }
