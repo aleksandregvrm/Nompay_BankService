@@ -15,7 +15,6 @@ import com.nompay.banking_universal.utils.impl.SessionServiceImpl
 import org.apache.coyote.BadRequestException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -31,7 +30,7 @@ class AccountServiceImpl(
 
   private val sessionService: SessionServiceImpl,
 
-  @Lazy private val transactionService: TransactionServiceImpl,
+  private val transactionService: TransactionServiceImpl,
 
   private val logger: Logger = LoggerFactory.getLogger(AccountServiceImpl::class.java)
 ) : AccountService {
@@ -111,6 +110,11 @@ class AccountServiceImpl(
       throw IllegalStateException("Insufficient balance.")
     }
 
+    if(amount < BigDecimal("0.01")){
+      logger.error("Cannot Transfer such funds")
+      throw IllegalStateException("Cannot Transfer such funds")
+    }
+
     fromAccount.balance = fromAccount.balance.subtract(amount)
     toAccount.balance = toAccount.balance.add(amount)
 
@@ -118,8 +122,8 @@ class AccountServiceImpl(
     this.accountRepository.save(toAccount)
 
     val transaction = CreateTransactionDto.Builder()
-      .withFromUser(fromAccount.ownerUser)
-      .withToUser(fromAccount.ownerUser)
+      .withFromUser(fromAccount.ownerUser!!)
+      .withToUser(fromAccount.ownerUser!!)
       .withFromEmail(fromAccount.email)
       .withToEmail(toAccount.email)
       .withFromAccount(fromAccount)

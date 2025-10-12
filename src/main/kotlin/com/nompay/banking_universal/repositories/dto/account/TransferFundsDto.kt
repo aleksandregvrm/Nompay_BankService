@@ -1,6 +1,6 @@
 package com.nompay.banking_universal.repositories.dto.account
 
-import com.nompay.banking_universal.repositories.enums.Currencies
+import com.nompay.banking_universal.repositories.enums.other.Currencies
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank

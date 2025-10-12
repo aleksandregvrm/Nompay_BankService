@@ -52,10 +52,16 @@ class UserEntity(
   @OneToMany(mappedBy = "ownerUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   var accounts: MutableSet<AccountEntity> = mutableSetOf()
 
-  @OneToMany(mappedBy = "fromUserId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OneToMany(mappedBy = "ownerUser", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var userOwnedMerchants: MutableSet<MerchantEntity> = mutableSetOf()
+
+  @ManyToMany(mappedBy = "accessorUsers")
+  var accessedMerchants: MutableSet<MerchantEntity> = mutableSetOf()
+
+  @OneToMany(mappedBy = "fromUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   var transactions: MutableList<TransactionEntity> = mutableListOf()
 
-  @OneToMany(mappedBy = "toUserId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OneToMany(mappedBy = "toUser", cascade = [CascadeType.ALL], orphanRemoval = true)
   var receivedTransactions: MutableList<TransactionEntity> = mutableListOf()
 
   @OneToOne(mappedBy = "userId", cascade = [CascadeType.ALL], orphanRemoval = true)
@@ -82,6 +88,16 @@ class UserEntity(
         "id=$id, " +
         "createDate=$createDate, " +
         "updateDate=$updateDate)" // Accounts are removed here
+  }
+
+  fun addAccount(account: AccountEntity){
+    this.accounts.add(account);
+    account.ownerUser = this
+  }
+
+  fun removeAccount(account: AccountEntity){
+    this.accounts.remove(account)
+    account.ownerUser = null
   }
 }
 

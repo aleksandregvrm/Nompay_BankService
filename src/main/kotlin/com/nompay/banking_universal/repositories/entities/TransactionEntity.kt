@@ -1,6 +1,7 @@
 package com.nompay.banking_universal.repositories.entities
 
-import com.nompay.banking_universal.repositories.enums.Currencies
+import com.nompay.banking_universal.repositories.enums.other.Currencies
+import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -27,12 +28,26 @@ import java.time.Instant
 class TransactionEntity(
 
   @ManyToOne
-  @JoinColumn(name = "from_user_id", nullable = false)
-  val fromUserId: UserEntity,
+  @JoinColumn(name = "from_user_id")
+  var fromUser: UserEntity? = null,
 
   @ManyToOne
-  @JoinColumn(name = "to_user_id", nullable = false)
-  val toUserId: UserEntity,
+  @JoinColumn(name = "to_user_id")
+  var toUser: UserEntity? = null,
+
+  @ManyToOne
+  @JoinColumn(name = "from_merchant")
+  var fromMerchant: MerchantEntity? = null,
+
+  @ManyToOne
+  @JoinColumn(name = "to_merchant")
+  var toMerchant: MerchantEntity? = null,
+
+  @Column(name = "from_external")
+  var fromExternal: String? = null,
+
+  @Column(name = "to_external")
+  var toExternal: String? = null,
 
   @Column(name = "from_email", nullable = false)
   val fromEmail: String,
@@ -42,11 +57,11 @@ class TransactionEntity(
 
   @ManyToOne
   @JoinColumn(name = "from_account_id", nullable = false)
-  val fromAccountId: AccountEntity,
+  val fromAccount: AccountEntity,
 
   @ManyToOne
   @JoinColumn(name = "to_account_id", nullable = false)
-  val toAccountId: AccountEntity,
+  val toAccount: AccountEntity,
 
   @Column(name = "currency", nullable = false)
   val currency: Currencies,
@@ -65,16 +80,23 @@ class TransactionEntity(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null
 
+  @Column(name = "transaction_type")
+  var transactionType: TransactionTypes? = null
+
   @PrePersist
   fun prePersist() {
     val now = Instant.now()
     createDate = now
   }
+
+  override fun toString(): String {
+    return "TransactionEntity(fromUser=$fromUser, toUser=$toUser, fromEmail='$fromEmail', toEmail='$toEmail', fromAccount=$fromAccount, toAccount=$toAccount, currency=$currency, amount=$amount, transactionId='$transactionId', createDate=$createDate, id=$id)"
+  }
 }
 
 interface TransactionEntityRepository : JpaRepository<TransactionEntity, Long> {
-  fun getTransactionByFromUserId(fromUserId: Long): List<TransactionEntity>?
-  fun getTransactionByToUserId(toUserId: Long): List<TransactionEntity>?
-  fun getTransactionByFromAccountId(fromAccountId: Long): List<TransactionEntity>?
-  fun getTransactionByToAccountId(toAccountId: Long): List<TransactionEntity>?
+  fun getTransactionByFromUser_Id(userId: Long): List<TransactionEntity>?
+  fun getTransactionByToUser_Id(userId: Long): List<TransactionEntity>?
+  fun getTransactionByFromAccount_Id(accountId: Long): List<TransactionEntity>?
+  fun getTransactionByToAccount_Id(accountId: Long): List<TransactionEntity>?
 }

@@ -2,7 +2,7 @@ package com.nompay.banking_universal.utils.impl
 
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.AccountEntityRepository
-import com.nompay.banking_universal.repositories.enums.Currencies
+import com.nompay.banking_universal.repositories.enums.other.Currencies
 import com.nompay.banking_universal.utils.IBANService
 import org.apache.coyote.BadRequestException
 import org.springframework.stereotype.Service

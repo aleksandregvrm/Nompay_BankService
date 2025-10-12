@@ -1,7 +1,7 @@
 package com.nompay.banking_universal.utils.impl
 
 import com.nompay.banking_universal.repositories.dto.external.CurrencyExchangeDto
-import com.nompay.banking_universal.repositories.enums.Currencies
+import com.nompay.banking_universal.repositories.enums.other.Currencies
 import com.nompay.banking_universal.utils.ExternalService
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value

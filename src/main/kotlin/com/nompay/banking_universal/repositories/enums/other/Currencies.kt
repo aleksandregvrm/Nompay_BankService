@@ -1,4 +1,4 @@
-package com.nompay.banking_universal.repositories.enums
+package com.nompay.banking_universal.repositories.enums.other
 
 enum class Currencies(val code: String, val symbol: String) {
   USD("USD", "UNITED STATES DOLLAR"),

@@ -1,6 +1,6 @@
 package com.nompay.banking_universal.repositories.dto.transactions
 
-import com.nompay.banking_universal.repositories.enums.Currencies
+import com.nompay.banking_universal.repositories.enums.other.Currencies
 import java.math.BigDecimal
 
 data class ReTransferFundsDto(

@@ -7,6 +7,6 @@ import com.nompay.banking_universal.repositories.entities.TransactionEntity
 
 interface TransactionService {
   fun createTransaction(createTransactionDto: CreateTransactionDto)
-  fun retrieveTransactions(retrieveTransactionsDto: RetrieveTransactionsDto): List<TransactionEntity>
-  fun reTransferFunds(reTransferFundsDto: ReTransferFundsDto): String
+  fun retrieveAllUserTransactions(retrieveTransactionsDto: RetrieveTransactionsDto): List<TransactionEntity>
+  fun retryTransaction(reTransferFundsDto: ReTransferFundsDto): String
 }

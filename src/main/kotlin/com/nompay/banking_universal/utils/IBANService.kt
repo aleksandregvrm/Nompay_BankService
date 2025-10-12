@@ -1,7 +1,7 @@
 package com.nompay.banking_universal.utils
 
 import com.nompay.banking_universal.repositories.entities.AccountEntity
-import com.nompay.banking_universal.repositories.enums.Currencies
+import com.nompay.banking_universal.repositories.enums.other.Currencies
 
 interface IBANService {
   fun generateAccountIBAN(): String

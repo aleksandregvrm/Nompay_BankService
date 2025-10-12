@@ -30,7 +30,7 @@ input UpdateAccountInput {
 
 # Query for transferring funds from one account to another
 input TransferFundsInput {
-    amount: Int!
+    amount: Float!
     currency: Currencies!
     fromEmail: String
     toEmail: String

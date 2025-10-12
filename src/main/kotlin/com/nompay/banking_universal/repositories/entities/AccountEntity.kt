@@ -1,10 +1,12 @@
 package com.nompay.banking_universal.repositories.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.nompay.banking_universal.repositories.enums.Currencies
+import com.nompay.banking_universal.repositories.enums.accounts.AccountTypes
+import com.nompay.banking_universal.repositories.enums.other.Currencies
 import jakarta.persistence.*
 import org.springframework.data.jpa.repository.JpaRepository
 import java.math.BigDecimal
+import java.time.Instant
 
 
 @Entity
@@ -31,13 +33,20 @@ class AccountEntity(
   @ManyToOne
   @JoinColumn(name = "owner_user_id")
   @JsonIgnore
-  val ownerUser: UserEntity
+  var ownerUser: UserEntity? = null,
+
+  @ManyToOne
+  @JoinColumn(name = "owner_merchant_id")
+  var ownerMerchant: MerchantEntity? = null,
+
+  @Column(name = "account_type")
+  var accountType: AccountTypes? = null
 ) {
 
-  @OneToMany(mappedBy = "fromAccountId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OneToMany(mappedBy = "fromAccount", cascade = [CascadeType.ALL], orphanRemoval = true)
   var transactions: MutableList<TransactionEntity> = mutableListOf()
 
-  @OneToMany(mappedBy = "toAccountId", cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OneToMany(mappedBy = "toAccount", cascade = [CascadeType.ALL], orphanRemoval = true)
   var receivedTransactions: MutableList<TransactionEntity> = mutableListOf()
 
   @Id
@@ -46,6 +55,15 @@ class AccountEntity(
 
   @Column(name = "balance", nullable = false, columnDefinition = "DECIMAL(19,2) DEFAULT 0")
   var balance: BigDecimal = BigDecimal.ZERO
+
+  @Column(name = "create_date", nullable = false, columnDefinition = "DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6)")
+  var createDate: Instant? = null
+
+  @PrePersist
+  fun prePersist() {
+    val now = Instant.now()
+    createDate = now
+  }
 
   override fun toString(): String {
     return "AccountEntity(email='$email', name='$name', currency=$currency, iban='$iban', id=$id, balance=$balance, ownerUser=$ownerUser)"
