@@ -34,8 +34,13 @@ input TransferFundsInput {
     currency: Currencies!
     fromEmail: String
     toEmail: String
+    fromMerchant: String
+    toMerchant: String
+    fromExternal: Int
+    toExternal: Int
     fromAccountNumber: String
     toAccountNumber: String
+    transactionType: TransactionTypes!
     transferDescription: String
 }
 

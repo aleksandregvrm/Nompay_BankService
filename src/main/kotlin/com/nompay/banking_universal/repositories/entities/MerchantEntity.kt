@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.UuidGenerator
 import org.hibernate.type.SqlTypes
@@ -21,7 +22,11 @@ import java.time.Instant
 
 @Entity
 @Table(
-  name = "merchants", indexes = [
+  name = "merchants",
+  uniqueConstraints = [
+    UniqueConstraint(columnNames = ["legal_name"]),
+  ],
+  indexes = [
     Index(name = "idx_merchant_email", columnList = "email"),
     Index(name = "idx_owner_user", columnList = "owner_user")
   ]

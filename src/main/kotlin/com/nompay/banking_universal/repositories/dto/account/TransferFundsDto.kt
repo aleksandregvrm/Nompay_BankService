@@ -1,6 +1,8 @@
 package com.nompay.banking_universal.repositories.dto.account
 
+import com.nompay.banking_universal.repositories.entities.ExternalAccountEntity
 import com.nompay.banking_universal.repositories.enums.other.Currencies
+import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank
@@ -20,9 +22,19 @@ data class TransferFundsDto(
 
   val toEmail: String?,
 
+  val fromMerchant: String?,
+
+  val toMerchant: String?,
+
+  val fromExternal: ExternalAccountEntity?,
+
+  val toExternal: ExternalAccountEntity?,
+
   val fromAccountNumber: String?, // Meaning IBAN
 
   val toAccountNumber: String?,
+
+  val transactionType: TransactionTypes, // <- Type of Transaction made, you can check out the enum for more info
 
   val transferDescription: String? // Description of the transfer made
 

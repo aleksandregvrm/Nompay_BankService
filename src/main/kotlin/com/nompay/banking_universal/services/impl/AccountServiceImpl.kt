@@ -7,8 +7,10 @@ import com.nompay.banking_universal.repositories.dto.account.TransferFundsIntern
 import com.nompay.banking_universal.repositories.dto.transactions.CreateTransactionDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.AccountEntityRepository
+import com.nompay.banking_universal.repositories.entities.ExternalAccountEntity
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
+import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import com.nompay.banking_universal.services.AccountService
 import com.nompay.banking_universal.utils.impl.IBANServiceImpl
 import com.nompay.banking_universal.utils.impl.SessionServiceImpl
@@ -28,11 +30,18 @@ class AccountServiceImpl(
 
   private val userRepository: UserEntityRepository,
 
+  private val externalAccountService: ExternalAccountServiceImpl,
+
   private val sessionService: SessionServiceImpl,
 
   private val transactionService: TransactionServiceImpl,
 
-  private val logger: Logger = LoggerFactory.getLogger(AccountServiceImpl::class.java)
+  private val logger: Logger = LoggerFactory.getLogger(AccountServiceImpl::class.java),
+
+  private val transfersToExternalSourceCheck: List<TransactionTypes> = listOf<TransactionTypes>(
+    TransactionTypes.USERTOEXTERNAL,
+    TransactionTypes.MERCHANTTOEXTERNAL
+  )
 ) : AccountService {
 
   override fun createAccount(createAccountDto: CreateAccountDto): AccountEntity {
@@ -43,8 +52,10 @@ class AccountServiceImpl(
     if (!userAccounts.isNullOrEmpty()) {
       val sameAccountForCurrency = userAccounts.filter { it.currency == createAccountDto.currency };
       if (sameAccountForCurrency.size > 2) {
-        logger.error("Cannot create three accounts with the " +
-            "same currency of ${createAccountDto.currency}")
+        logger.error(
+          "Cannot create three accounts with the " +
+              "same currency of ${createAccountDto.currency}"
+        )
         throw IllegalArgumentException(
           "Cannot create three accounts with the " +
               "same currency of ${createAccountDto.currency}"
@@ -73,7 +84,8 @@ class AccountServiceImpl(
 
   @Transactional
   override fun transferFunds(transferFundsDto: TransferFundsDto): String {
-    val (amount, currency, fromEmail, toEmail, fromAccountNumber, toAccountNumber, transferDescription ) = transferFundsDto
+    val (amount, currency, fromEmail, toEmail, fromMerchant, toMerchant,
+      fromExternal, toExternal, fromAccountNumber, toAccountNumber, transactionType, transferDescription) = transferFundsDto
 
     // Retrieving the correct Account and if the email is used retrieve the first account with that email
     val fromAccount: AccountEntity = when {
@@ -110,7 +122,7 @@ class AccountServiceImpl(
       throw IllegalStateException("Insufficient balance.")
     }
 
-    if(amount < BigDecimal("0.01")){
+    if (amount < BigDecimal("0.01")) {
       logger.error("Cannot Transfer such funds")
       throw IllegalStateException("Cannot Transfer such funds")
     }
@@ -126,7 +138,12 @@ class AccountServiceImpl(
       .withToUser(fromAccount.ownerUser!!)
       .withFromEmail(fromAccount.email)
       .withToEmail(toAccount.email)
+      .withFromMerchant(fromAccount.ownerMerchant)
+      .withToMerchant(toAccount.ownerMerchant)
       .withFromAccount(fromAccount)
+      .withFromExternal(fromExternal)
+      .withToExternal(toExternal)
+      .withTransactionType(transactionType)
       .withToAccount(toAccount)
       .withTransactionId(UUID.randomUUID().toString())
       .withCurrency(currency)

@@ -43,11 +43,13 @@ class TransactionEntity(
   @JoinColumn(name = "to_merchant")
   var toMerchant: MerchantEntity? = null,
 
-  @Column(name = "from_external")
-  var fromExternal: String? = null,
+  @ManyToOne
+  @JoinColumn(name = "from_external")
+  var fromExternal: ExternalAccountEntity? = null,
 
-  @Column(name = "to_external")
-  var toExternal: String? = null,
+  @ManyToOne
+  @JoinColumn(name = "to_external")
+  var toExternal: ExternalAccountEntity? = null,
 
   @Column(name = "from_email", nullable = false)
   val fromEmail: String,
@@ -81,7 +83,10 @@ class TransactionEntity(
   var id: Long? = null
 
   @Column(name = "transaction_type")
-  var transactionType: TransactionTypes? = null
+  val transactionType: TransactionTypes? = null
+
+  @Column(name = "description")
+  var transactionDescription: String? = null
 
   @PrePersist
   fun prePersist() {

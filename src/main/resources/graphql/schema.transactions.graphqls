@@ -5,7 +5,7 @@ extend type Query {
 }
 
 extend type Mutation {
-    processExternalTransaction()
+    processExternalTransaction(userId: String!): String
 }
 
 enum TransactionStatuses {
@@ -15,13 +15,29 @@ enum TransactionStatuses {
     PENDING
 }
 
+enum TransactionTypes {
+    USERTOUSER
+    USERTOMERCHANT
+    MERCHANTTOUSER
+    MERCHANTTOMERCHANT
+    EXTERNALTOMERCHANT
+    MERCHANTTOEXTERNAL
+    EXTERNALTOUSER
+    USERTOEXTERNAL
+}
+
 type Transaction {
     id: Int!
     transactionId: String!
-    fromUserId: Int!
-    toUserId: Int!
+    transactionType: TransactionTypes!
+    fromUserId: Int
+    toUserId: Int
     fromEmail: String!
     toEmail: String!
+    fromMerchant: String
+    toMerchant: String
+    fromExternal: Int
+    toExternal: Int
     fromAccountId: String!
     toAccountId: String!
     currency: Currencies!

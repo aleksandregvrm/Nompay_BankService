@@ -1,8 +1,9 @@
 package com.nompay.banking_universal.repositories.enums.transactions
 
 enum class TransactionTypes(val symbol: String, val type: String) {
-  MERCHANTTOUSER("MTU", "MERCHANT_TO_USER"),
+  USERTOUSER("UTU", "USER_TO_USER"),
   USERTOMERCHANT("UTM", "USER_TO_MERCHANT"),
+  MERCHANTTOUSER("MTU", "MERCHANT_TO_USER"),
   MERCHANTTOMERCHANT("MTM", "MERCHANT_TO_MERCHANT"),
   EXTERNALTOMERCHANT("ETM", "EXTERNAL_TO_MERCHANT"),
   MERCHANTTOEXTERNAL("MTE", "MERCHANT_TO_EXTERNAL"),
