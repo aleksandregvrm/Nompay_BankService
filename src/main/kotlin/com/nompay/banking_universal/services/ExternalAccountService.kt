@@ -4,6 +4,6 @@ import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalAcc
 import com.nompay.banking_universal.repositories.entities.ExternalAccountEntity
 
 interface ExternalAccountService {
-  fun checkForExternalAccount(externalAccountInfo: ExternalAccountDto): ExternalAccountEntity
-  fun createExternalAccount(externalAccountInfo: ExternalAccountDto): String
+  fun checkForExternalAccount(iban: String): ExternalAccountEntity?
+  fun createExternalAccount(externalAccountInfo: ExternalAccountDto): ExternalAccountEntity
 }

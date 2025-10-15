@@ -90,6 +90,8 @@ data class ExternalAccountEntityBilling (
   val postalCode: String,
 
   val ipAddress: String,
+
+  val customerId: String
 )
 
 interface ExternalAccountEntityRepository : JpaRepository<ExternalAccountEntity, String>{

@@ -18,24 +18,24 @@ data class TransferFundsDto(
   @field:NotNull(message = "Please provide the currency")
   val currency: Currencies,
 
-  val fromEmail: String?,
+  val fromEmail: String? = null,
 
-  val toEmail: String?,
+  val toEmail: String? = null,
 
-  val fromMerchant: String?,
+  val fromMerchant: String? = null,
 
-  val toMerchant: String?,
+  val toMerchant: String? = null,
 
-  val fromExternal: ExternalAccountEntity?,
+  val fromExternal: ExternalAccountEntity? = null,
 
-  val toExternal: ExternalAccountEntity?,
+  val toExternal: ExternalAccountEntity? = null,
 
-  val fromAccountNumber: String?, // Meaning IBAN
+  val fromAccountNumber: String? = null, // Meaning IBAN
 
-  val toAccountNumber: String?,
+  val toAccountNumber: String? = null,
 
-  val transactionType: TransactionTypes, // <- Type of Transaction made, you can check out the enum for more info
+  var transactionType: TransactionTypes, // <- Type of Transaction made, you can check out the enum for more info
 
-  val transferDescription: String? // Description of the transfer made
+  val transferDescription: String? = null // Description of the transfer made
 
 )

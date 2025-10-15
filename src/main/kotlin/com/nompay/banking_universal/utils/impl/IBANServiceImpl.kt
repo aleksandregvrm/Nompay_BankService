@@ -56,4 +56,8 @@ class IBANServiceImpl(
     return Pair(fromEmailAccount!!, toEmailAccount!!)
   }
 
+  override fun checkForIbanFormatting(iban: String): Boolean {
+    TODO("Not yet implemented")
+  }
+
 }

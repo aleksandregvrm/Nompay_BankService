@@ -15,4 +15,7 @@ interface IBANService {
     toEmail: String,
     currency: Currencies
   ): Pair<AccountEntity, AccountEntity>
+  fun checkForIbanFormatting(
+    iban: String
+  ): Boolean
 }
