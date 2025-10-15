@@ -52,7 +52,6 @@ class ExternalTransferController(
         name = request.name,
         surname = request.surname,
         phone = request.phone,
-        accountNumber = request.accountNumber,
         bank = request.bank,
         iban = request.iban,
         dateOfBirth = request.dateOfBirth,
@@ -74,7 +73,7 @@ class ExternalTransferController(
 
       try {
         this.accountServiceImpl.transferFunds(transferFundsDto)
-
+        this.externalAccountService.createExternalAccountTransaction(request)
       } catch (e: IllegalStateException ){
         // Handle Failed transaction logic storing it in both internal transactions database as well as external Transactions database
       }

@@ -73,26 +73,15 @@ class ExternalAccountEntity(
   @OneToMany(mappedBy = "toExternal", cascade = [CascadeType.ALL], orphanRemoval = true)
   var toTransactions: MutableList<TransactionEntity> = mutableListOf()
 
+  @OneToMany(mappedBy = "ownerExternalAccount", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var externalAccountTransactions: MutableList<ExternalAccountTransactionsEntity> = mutableListOf()
+
   @PrePersist
   fun prePersist() {
     val now = Instant.now()
     createDate = now
   }
 }
-
-data class ExternalAccountEntityBilling (
-  val city: String,
-
-  val country: String,
-
-  val state: String,
-
-  val postalCode: String,
-
-  val ipAddress: String,
-
-  val customerId: String
-)
 
 interface ExternalAccountEntityRepository : JpaRepository<ExternalAccountEntity, String>{
 

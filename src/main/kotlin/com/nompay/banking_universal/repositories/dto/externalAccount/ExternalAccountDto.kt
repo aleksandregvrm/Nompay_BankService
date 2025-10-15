@@ -7,7 +7,6 @@ open class ExternalAccountDto(
   open val name: String,
   open val surname: String,
   open val phone: String,
-  open val accountNumber: String,
   open val bank: String,
   open val iban: String,
   open val dateOfBirth: Date,

@@ -38,9 +38,9 @@ class AccountServiceImpl(
 
   private val logger: Logger = LoggerFactory.getLogger(AccountServiceImpl::class.java),
 
-  private val transfersToExternalSourceCheck: List<TransactionTypes> = listOf<TransactionTypes>(
-    TransactionTypes.USERTOEXTERNAL,
-    TransactionTypes.MERCHANTTOEXTERNAL
+  private val externalTransferSourceCheck: HashMap<String, Set<TransactionTypes>> = hashMapOf<String, Set<TransactionTypes>>(
+    "fromExternal" to setOf<TransactionTypes>(TransactionTypes.EXTERNALTOMERCHANT, TransactionTypes.EXTERNALTOUSER),
+    "toExternal" to setOf<TransactionTypes>(TransactionTypes.MERCHANTTOEXTERNAL, TransactionTypes.USERTOEXTERNAL)
   )
 ) : AccountService {
 
@@ -127,8 +127,17 @@ class AccountServiceImpl(
       throw IllegalStateException("Cannot Transfer such funds")
     }
 
-    fromAccount.balance = fromAccount.balance.subtract(amount)
-    toAccount.balance = toAccount.balance.add(amount)
+    val transfersFromExternal = this.externalTransferSourceCheck["fromExternal"] ?: emptySet()
+
+    if (!transfersFromExternal.contains(transactionType)) { // Checks whether funds are coming from the external source
+      fromAccount.balance = fromAccount.balance.subtract(amount)
+    }
+
+    val transfersToExternal = this.externalTransferSourceCheck["toExternal"] ?: emptySet()
+
+    if (!transfersToExternal.contains(transactionType)) { // checks whether funds are going to teh external source
+      toAccount.balance = toAccount.balance.add(amount)
+    }
 
     this.accountRepository.save(fromAccount)
     this.accountRepository.save(toAccount)
