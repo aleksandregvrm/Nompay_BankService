@@ -1,69 +1,41 @@
-# Nompay Banking
-📝 Description
+# 🏦 Nompay Banking
 
-Nompay Banking Is an innovative banking solutions that provides fast and reliable way to store and transfer your funds.
-.
-✨ Features
+## 📝 Description
+**Nompay Banking** is an innovative banking solution that provides a **fast and reliable way to store and transfer your funds**.
 
-List the main capabilities and highlights of your application here.
+---
 
-    [Easy Registration]: You can register and set up your account within seconds.
+## ✨ Features
 
-    [Fast Transfer]: Whether you are merchant or just a regular user you can transfer funds within milliseconds.
+- **Easy Registration** — Register and set up your account within seconds.
+- **Fast Transfer** — Whether you are a merchant or a regular user, transfer funds within milliseconds.
+- **Dual API Support** — Supports both **REST** and **GraphQL** integrations.
+- **Modern Technology** — Core technology powered by **GraphQL Java**, offering a robust and efficient backend solution.
 
-    [Support both Rest and Graphql integration]: Core Technology used is GraphQL which is a modern and robust solution.
+---
 
-🚀 Getting Started
+## 🚀 Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-Prerequisites
+These instructions will help you get a copy of the project up and running on your local machine for **development** and **testing** purposes.
 
-What things you need to install the software and how to install them:
+---
 
-    Kotlin.JVM: v2.2.0 or higher
+### 🧩 Prerequisites
 
-    Java: v23 or higher
+Ensure you have the following installed:
 
-    Database: MYSQL running through docker
+- **Kotlin.JVM:** `v2.2.0` or higher
+- **Java:** `v23` or higher
+- **Database:** MySQL (running via Docker)
+- **Other Tools:**
+    - Docker `v28.0.0` or higher
+    - GraphQL-Java `v24.0` or higher
 
-    Other: Docker v28.0.0 or higher, GraphQL-java version 24.0 or higher
+---
 
-Installation
+### ⚙️ Installation
 
-    Clone the repository:
-
-    git clone [your_repo_link]
-    cd [project-name]
-
-    Install project dependencies through Gradle.
-
-🛠️ Usage (Running the Application)
-
-Follow these steps to start the application after completing the setup.
-Development Mode
-
-To run the application with hot-reloading for local development:
-
-The application will typically be accessible at: http://localhost:[8080] (e.g., http://localhost:8080).
-Production Build
-
-🤝 Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
-
-    Fork the Project.
-
-    Create your Feature Branch: git checkout -b feature/AmazingFeature
-
-    Commit your Changes: git commit -m 'Add some AmazingFeature'
-
-    Push to the Branch: git push origin feature/AmazingFeature
-
-    Open a Pull Request.
-
-📜 License
-
-Distributed under the [License Name] License. See LICENSE.md for more information.
-📧 Contact
-
-[Aleksandre Gvaramia] - [aleksandregvrm@gmail.com]
+1. **Clone the repository:**
+   ```bash
+   git clone [your_repo_link]
+   cd [project-name]
