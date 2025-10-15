@@ -1,7 +1,7 @@
-[Nompay Banking]
+# Nompay Banking
 📝 Description
 
-[Nompay Banking] Is an innovative banking solutions that provides fast and reliable way to store and transfer your funds.
+Nompay Banking Is an innovative banking solutions that provides fast and reliable way to store and transfer your funds.
 .
 ✨ Features
 
