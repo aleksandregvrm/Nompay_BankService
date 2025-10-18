@@ -55,14 +55,14 @@ data class CreateTransactionDto(
     fun withToMerchant(toMerchant: MerchantEntity?) = apply { this.toMerchant = toMerchant }
     fun withFromExternal(fromExternal: ExternalAccountEntity?) = apply { this.fromExternal = fromExternal }
     fun withToExternal(toExternal: ExternalAccountEntity?) = apply { this.toExternal = toExternal }
-    fun withFromAccount(fromAccount: AccountEntity) = apply { this.fromAccount = fromAccount }
-    fun withToAccount(toAccount: AccountEntity) = apply { this.toAccount = toAccount }
+    fun withFromAccount(fromAccount: AccountEntity?) = apply { this.fromAccount = fromAccount }
+    fun withToAccount(toAccount: AccountEntity?) = apply { this.toAccount = toAccount }
     fun withTransactionType(transactionType: TransactionTypes) = apply { this.transactionType = transactionType }
     fun withTransactionId(transactionId: String) = apply { this.transactionId = transactionId }
     fun withCurrency(currency: Currencies) = apply { this.currency = currency }
     fun withAmount(amount: BigDecimal) = apply { this.amount = amount }
     fun withStatus(status: TransactionStatuses) = apply { this.status = status }
-    fun withDescription(description: String) = apply { this.description = description }
+    fun withDescription(description: String?) = apply { this.description = description }
 
     fun build(): CreateTransactionDto {
       return CreateTransactionDto(

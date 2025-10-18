@@ -1,4 +1,4 @@
-package com.nompay.banking_universal.annotations.auth
+package com.nompay.banking_universal.annotations.graphAuth
 
 import com.nompay.banking_universal.utils.SessionService
 import graphql.schema.DataFetchingEnvironment
@@ -26,14 +26,12 @@ class AuthAspect(
   private val sessionService: SessionService
 ) {
 
-  @Before("@annotation(com.nompay.banking_universal.annotations.auth.RequiresAuth)")
+  @Before("@annotation(com.nompay.banking_universal.annotations.graphAuth.RequiresAuth)")
   fun checkAuthorization(joinPoints: JoinPoint){
     val args = joinPoints.args;
-    println("printing args in here...")
-    println(args.filterIsInstance<Int>().firstOrNull())
+
     val userId = args.filterIsInstance<Int>().firstOrNull();
-    println(userId)
-    println("printing user id in here...")
+
     val environment = args.filterIsInstance<DataFetchingEnvironment>().firstOrNull()
 
     if (userId == null || environment == null) {

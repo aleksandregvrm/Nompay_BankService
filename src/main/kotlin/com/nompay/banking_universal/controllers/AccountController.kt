@@ -1,9 +1,10 @@
 package com.nompay.banking_universal.controllers
 
-import com.nompay.banking_universal.annotations.auth.RequiresAuth
+import com.nompay.banking_universal.annotations.graphAuth.RequiresAuth
 import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
+import com.nompay.banking_universal.repositories.entities.TransactionEntity
 import com.nompay.banking_universal.services.impl.AccountServiceImpl
 import graphql.schema.DataFetchingEnvironment
 import org.springframework.graphql.data.method.annotation.Argument
@@ -31,7 +32,7 @@ class AccountController(
     @Argument("userId") userId: Int,
     @Argument("input") input: TransferFundsDto,
     environment: DataFetchingEnvironment
-  ): String {
+  ): TransactionEntity {
     return this.accountService.transferFunds(input);
   }
 }

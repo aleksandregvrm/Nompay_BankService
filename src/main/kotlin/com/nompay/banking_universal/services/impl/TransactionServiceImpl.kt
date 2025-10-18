@@ -1,5 +1,7 @@
 package com.nompay.banking_universal.services.impl
 
+import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
+import com.nompay.banking_universal.repositories.dto.notification.ExternalNotificationDto
 import com.nompay.banking_universal.repositories.dto.transactions.RetrieveTransactionsDto
 import com.nompay.banking_universal.services.TransactionService
 import com.nompay.banking_universal.repositories.dto.transactions.CreateTransactionDto
@@ -17,7 +19,7 @@ class TransactionServiceImpl(
   private val logger: Logger = LoggerFactory.getLogger(TransactionServiceImpl::class.java),
 
   ) : TransactionService {
-  override fun createTransaction(createTransactionDto: CreateTransactionDto) {
+  override fun createTransaction(createTransactionDto: CreateTransactionDto): TransactionEntity {
 
     val transactionEntity = TransactionEntity(
       fromUser = createTransactionDto.fromUser,
@@ -33,8 +35,12 @@ class TransactionServiceImpl(
       currency = createTransactionDto.currency,
       amount = createTransactionDto.amount,
       transactionId = createTransactionDto.transactionId
-    )
-
+    ).apply {
+      this.transactionType = createTransactionDto.transactionType // Assigning the transaction Type of the payment transaction
+      this.transactionDescription = createTransactionDto.description
+    }
+    println(transactionEntity)
+    println("logging transaction entity in here...")
     this.transactionEntityRepository.save<TransactionEntity>(transactionEntity)
 
     this.logger.info(
@@ -43,6 +49,7 @@ class TransactionServiceImpl(
       transactionEntity.fromEmail,
       transactionEntity.toEmail
     )
+    return transactionEntity
   }
 
   override fun retryTransaction(reTransferFundsDto: ReTransferFundsDto): String {
@@ -51,6 +58,10 @@ class TransactionServiceImpl(
 
 
   override fun retrieveAllUserTransactions(retrieveTransactionsDto: RetrieveTransactionsDto): List<TransactionEntity> {
+    TODO("Not yet implemented")
+  }
+
+  override fun handleFailedTransaction(transferFundsDto: TransferFundsDto): ExternalNotificationDto {
     TODO("Not yet implemented")
   }
 }

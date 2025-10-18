@@ -4,12 +4,15 @@ import com.nompay.banking_universal.repositories.enums.other.Currencies
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
 import org.hibernate.annotations.UuidGenerator
@@ -66,6 +69,7 @@ class TransactionEntity(
   val toAccount: AccountEntity,
 
   @Column(name = "currency", nullable = false)
+  @Enumerated(EnumType.STRING)
   val currency: Currencies,
 
   @Column(name = "amount", nullable = false)
@@ -83,10 +87,19 @@ class TransactionEntity(
   var id: Long? = null
 
   @Column(name = "transaction_type")
-  val transactionType: TransactionTypes? = null
+  @Enumerated(EnumType.STRING)
+  var transactionType: TransactionTypes? = null
 
   @Column(name = "description")
   var transactionDescription: String? = null
+
+  @OneToOne()
+  @JoinColumn(
+    name = "external_transaction_ref_id",
+    referencedColumnName = "transactionId",
+    nullable = true
+  )
+  var externalReferencedTransaction: ExternalAccountTransactionsEntity? = null
 
   @PrePersist
   fun prePersist() {

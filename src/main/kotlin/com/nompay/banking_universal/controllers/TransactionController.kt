@@ -1,6 +1,6 @@
 package com.nompay.banking_universal.controllers
 
-import com.nompay.banking_universal.annotations.auth.RequiresAuth
+import com.nompay.banking_universal.annotations.graphAuth.RequiresAuth
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
 

@@ -5,6 +5,8 @@ import com.nompay.banking_universal.repositories.enums.other.Currencies
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Index
 import jakarta.persistence.OneToMany
@@ -47,6 +49,7 @@ class ExternalAccountEntity(
   val iban: String? = null,
 
   @Column(name = "currency")
+  @Enumerated(EnumType.STRING)
   val currency: Currencies? = null,
 
   @Column(name = "bank")
@@ -81,8 +84,12 @@ class ExternalAccountEntity(
     val now = Instant.now()
     createDate = now
   }
+
+  override fun toString(): String {
+    return "ExternalAccountEntity(email=$email, name=$name, surname=$surname, phone=$phone, iban=$iban, currency=$currency, bank=$bank, dateOfBirth=$dateOfBirth, externalAccountBilling=$externalAccountBilling, id=$id, createDate=$createDate)"
+  }
 }
 
 interface ExternalAccountEntityRepository : JpaRepository<ExternalAccountEntity, String>{
-
+  fun getExternalAccountByIban(iban: String): ExternalAccountEntity?
 }

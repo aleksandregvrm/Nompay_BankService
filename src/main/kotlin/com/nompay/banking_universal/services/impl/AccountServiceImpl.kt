@@ -7,7 +7,7 @@ import com.nompay.banking_universal.repositories.dto.account.TransferFundsIntern
 import com.nompay.banking_universal.repositories.dto.transactions.CreateTransactionDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.AccountEntityRepository
-import com.nompay.banking_universal.repositories.entities.ExternalAccountEntity
+import com.nompay.banking_universal.repositories.entities.TransactionEntity
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
@@ -83,43 +83,55 @@ class AccountServiceImpl(
   }
 
   @Transactional
-  override fun transferFunds(transferFundsDto: TransferFundsDto): String {
+  override fun transferFunds(transferFundsDto: TransferFundsDto): TransactionEntity {
     val (amount, currency, fromEmail, toEmail, fromMerchant, toMerchant,
       fromExternal, toExternal, fromAccountNumber, toAccountNumber, transactionType, transferDescription) = transferFundsDto
+    println(transferFundsDto)
 
-    // Retrieving the correct Account and if the email is used retrieve the first account with that email
-    val fromAccount: AccountEntity = when {
+    val transfersFromExternal = this.externalTransferSourceCheck["fromExternal"] ?: emptySet()
+    val transfersToExternal = this.externalTransferSourceCheck["toExternal"] ?: emptySet()
+
+    val fromAccount: AccountEntity? = when {
+      transfersFromExternal.contains(transactionType) -> null
       !fromAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(fromAccountNumber)
       !fromEmail.isNullOrBlank() && currency != null -> {
         this.accountRepository.getAccountsByEmail(fromEmail)?.firstOrNull { it.currency == currency }
       }
-
       else -> throw IllegalArgumentException("Source account details are required.")
-    } ?: throw IllegalStateException("Source account not found.")
+    }
 
-    // Retrieving the correct to Account and if the email is used retrieve the first account with that email
-    val toAccount: AccountEntity = when {
+    if (!transfersFromExternal.contains(transactionType) && fromAccount == null) {
+      throw IllegalStateException("Source account not found.")
+    }
+
+    val toAccount: AccountEntity? = when {
+      transfersToExternal.contains(transactionType) -> null
       !toAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(toAccountNumber)
       !toEmail.isNullOrBlank() && currency != null -> {
         this.accountRepository.getAccountsByEmail(toEmail)?.firstOrNull { it.currency == currency }
       }
-
       else -> throw IllegalArgumentException("Destination account details are required.")
-    } ?: throw IllegalStateException("Destination account not found.")
-
-    if (fromAccount.currency != toAccount.currency) {
-      logger.error("Currency mismatch. Conversions are not supported.")
-      throw IllegalStateException("Currency mismatch. Conversions are not supported.")
     }
 
-    if (fromAccount.id == toAccount.id) {
-      logger.error("Cannot transfer funds to the same account.")
-      throw IllegalStateException("Cannot transfer funds to the same account.")
+    if (!transfersToExternal.contains(transactionType) && toAccount == null) {
+      throw IllegalStateException("Destination account not found.")
     }
 
-    if (fromAccount.balance.compareTo(amount) < 0) {
-      logger.error("Insufficient balance.")
-      throw IllegalStateException("Insufficient balance.")
+    if (fromAccount != null && toAccount != null) {
+      if (fromAccount.currency != toAccount.currency) {
+        logger.error("Currency mismatch. Conversions are not supported.")
+        throw IllegalStateException("Currency mismatch. Conversions are not supported.")
+      }
+
+      if (fromAccount.id == toAccount.id) {
+        logger.error("Cannot transfer funds to the same account.")
+        throw IllegalStateException("Cannot transfer funds to the same account.")
+      }
+    }
+
+    if ((fromAccount?.currency ?: toAccount?.currency) != currency) {
+      logger.error("Currency mismatch with the account.")
+      throw IllegalStateException("Currency mismatch with the account")
     }
 
     if (amount < BigDecimal("0.01")) {
@@ -127,40 +139,48 @@ class AccountServiceImpl(
       throw IllegalStateException("Cannot Transfer such funds")
     }
 
-    val transfersFromExternal = this.externalTransferSourceCheck["fromExternal"] ?: emptySet()
-
-    if (!transfersFromExternal.contains(transactionType)) { // Checks whether funds are coming from the external source
+    if (fromAccount != null) {
+      if (fromAccount.balance.compareTo(amount) < 0) {
+        logger.error("Insufficient balance.")
+        throw IllegalStateException("Insufficient balance.")
+      }
       fromAccount.balance = fromAccount.balance.subtract(amount)
+      this.accountRepository.save(fromAccount)
     }
 
-    val transfersToExternal = this.externalTransferSourceCheck["toExternal"] ?: emptySet()
-
-    if (!transfersToExternal.contains(transactionType)) { // checks whether funds are going to teh external source
+    if (toAccount != null) {
       toAccount.balance = toAccount.balance.add(amount)
+      this.accountRepository.save(toAccount)
     }
 
-    this.accountRepository.save(fromAccount)
-    this.accountRepository.save(toAccount)
+    println(fromExternal)
+    println(toAccount)
+    println(currency)
+    println(transactionType)
+    println(transferFundsDto.transferDescription)
 
     val transaction = CreateTransactionDto.Builder()
-      .withFromUser(fromAccount.ownerUser!!)
-      .withToUser(fromAccount.ownerUser!!)
-      .withFromEmail(fromAccount.email)
-      .withToEmail(toAccount.email)
-      .withFromMerchant(fromAccount.ownerMerchant)
-      .withToMerchant(toAccount.ownerMerchant)
+      .withFromUser(fromAccount?.ownerUser)
+      .withToUser(toAccount?.ownerUser)
+      .withFromEmail(fromAccount?.email ?: fromExternal?.email!!)
+      .withToEmail(toAccount?.email ?: toExternal?.email!!)
+      .withFromMerchant(fromAccount?.ownerMerchant)
+      .withToMerchant(toAccount?.ownerMerchant)
       .withFromAccount(fromAccount)
       .withFromExternal(fromExternal)
+      .withToAccount(toAccount)
       .withToExternal(toExternal)
       .withTransactionType(transactionType)
-      .withToAccount(toAccount)
       .withTransactionId(UUID.randomUUID().toString())
       .withCurrency(currency)
       .withAmount(amount)
       .withStatus(TransactionStatuses.SUCCESS)
+      .withDescription(transferFundsDto.transferDescription)
       .build()
-    this.transactionService.createTransaction(transaction)
-    return "Funds transferred successfully."
+    println(transaction)
+    println("printing transactions in here..")
+    val transactionEntity = this.transactionService.createTransaction(transaction)
+    return transactionEntity
   }
 
   override fun transferFundsInternally(transferFundInternallyDto: TransferFundsInternallyDto): String {

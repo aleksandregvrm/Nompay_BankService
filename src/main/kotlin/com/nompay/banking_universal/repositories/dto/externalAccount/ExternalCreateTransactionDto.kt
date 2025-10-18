@@ -6,15 +6,18 @@ import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import org.hibernate.validator.constraints.Length
 import java.math.BigDecimal
 import java.sql.Date
 
 data class ExternalCreateTransactionDto(
   @field:NotBlank(message = "Please specify the email")
-  @get:JsonProperty("email") override val email: String,
+  @field:Length(min = 3, max = 30)
+  @get:JsonProperty("email") override val email: String? = null,
 
   @field:NotBlank(message = "Please specify the name")
-  @get:JsonProperty("name") override val name: String,
+  @field:Length(min = 3, max = 30)
+  @get:JsonProperty("name") override val name: String? = null,
 
   @field:NotBlank(message = "Please specify the surname")
   @get:JsonProperty("surname") override val surname: String,
@@ -34,13 +37,13 @@ data class ExternalCreateTransactionDto(
   @field:NotNull(message = "Please specify the External Account Billing")
   @get:JsonProperty("externalAccountBilling") override val externalAccountBilling: ExternalAccountBilling,
 
-  @field:NotBlank(message = "Please specify the amount to transfer")
+  @field:NotNull(message = "Please specify the amount to transfer")
   @field:DecimalMin(value = "0.01", message = "Minimal amount you can transfer is 0.01")
   @field:DecimalMax(value = "1000", message = "Maximum amount you can transfer is 1000")
   @get:JsonProperty("amount") val amount: BigDecimal, // Validating the field with validators
 
   @field:NotNull(message = "Please specify the currency")
-  @get:JsonProperty("currency") val currency: Currencies,
+  @get:JsonProperty("currency") override val currency: Currencies,
 
   @field:NotBlank(message = "Please specify the iban you are transferring the funds to")
   @get:JsonProperty("toIban") val toIban: String, // To iban is preferred method of transferring funds externally
@@ -48,7 +51,7 @@ data class ExternalCreateTransactionDto(
   @field:NotBlank(message = "Please specify the email")
   @get:JsonProperty("toEmail") val toEmail: String,
 
-  @field:NotBlank(message = "Please specify the type of transfer")
+  @field:NotNull(message = "Please specify the Merchant Transfer Type")
   @get:JsonProperty("merchantTransfer") val merchantTransfer: Boolean, // Whether transfer is to a merchant account or not
 
   @field:NotBlank(message = "Please specify the external transaction id")
@@ -66,4 +69,5 @@ data class ExternalCreateTransactionDto(
   iban,
   dateOfBirth,
   externalAccountBilling,
+  currency
 )

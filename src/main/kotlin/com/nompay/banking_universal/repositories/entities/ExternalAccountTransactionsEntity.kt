@@ -2,6 +2,7 @@ package com.nompay.banking_universal.repositories.entities
 
 import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalAccountBilling
 import com.nompay.banking_universal.repositories.enums.other.Currencies
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -10,6 +11,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
 import org.springframework.data.jpa.repository.JpaRepository
@@ -59,9 +61,6 @@ class ExternalAccountTransactionsEntity(
   @Column(name = "bank")
   val bank: String? = null,
 
-  @Column(name = "transaction_id")
-  val transactionId: String? = null,
-
   @Column(name = "to_email")
   val toEmail: String? = null,
 
@@ -72,7 +71,13 @@ class ExternalAccountTransactionsEntity(
   val externalTransactionId: String? = null,
 
   @Column(name = "notification_url")
-  val notificationUrl: String? = null
+  val notificationUrl: String? = null,
+
+  @Column(name = "transactionId", nullable = false, unique = true)
+  val transactionId: String,
+
+  @OneToOne(mappedBy = "externalReferencedTransaction")
+  var referencedTransaction: TransactionEntity? = null
 ) {
 
   @Id
@@ -93,6 +98,6 @@ class ExternalAccountTransactionsEntity(
   }
 }
 
-interface ExternalAccountTransactionEntityRepository : JpaRepository<ExternalAccountTransactionsEntity, Long>{
+interface ExternalAccountTransactionEntityRepository : JpaRepository<ExternalAccountTransactionsEntity, Long> {
 
 }

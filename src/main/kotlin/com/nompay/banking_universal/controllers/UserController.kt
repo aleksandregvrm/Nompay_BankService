@@ -1,6 +1,6 @@
 package com.nompay.banking_universal.controllers
 
-import com.nompay.banking_universal.annotations.auth.RequiresAuth
+import com.nompay.banking_universal.annotations.graphAuth.RequiresAuth
 import com.nompay.banking_universal.repositories.dto.user.CreateUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserReturnDto
@@ -10,7 +10,6 @@ import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.stereotype.Controller
 import graphql.schema.DataFetchingEnvironment
-import org.springframework.util.MultiValueMap
 
 @Controller
 class UserController(

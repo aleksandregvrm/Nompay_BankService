@@ -1,13 +1,20 @@
 package com.nompay.banking_universal.controllers
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalAccountBilling
 import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalAccountDto
 import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalCreateTransactionDto
 import com.nompay.banking_universal.repositories.entities.ExternalAccountEntityRepository
+import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import com.nompay.banking_universal.services.impl.AccountServiceImpl
 import com.nompay.banking_universal.services.impl.ExternalAccountServiceImpl
+import com.nompay.banking_universal.services.impl.TransactionServiceImpl
+import jakarta.validation.Valid
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -21,23 +28,50 @@ import java.lang.IllegalStateException
 class ExternalTransferController(
   private val externalAccountEntity: ExternalAccountEntityRepository,
 
+  private val transactionService: TransactionServiceImpl,
+
   private val externalAccountService: ExternalAccountServiceImpl,
 
-  private val accountServiceImpl: AccountServiceImpl
+  private val accountServiceImpl: AccountServiceImpl,
+
+  private val logger: Logger = LoggerFactory.getLogger(ExternalTransferController::class.java)
 ) {
+
+  // Formatting data for logging purposes
+  private val objectMapper = ObjectMapper().apply {
+    enable(SerializationFeature.INDENT_OUTPUT)
+  }
+
+  private fun assembleFailedTransactionLog(externalCreateTransactionDto: ExternalCreateTransactionDto) {
+    val hashmapToLog: HashMap<String, String> = hashMapOf(
+      "externalTransactionId" to externalCreateTransactionDto.externalTransactionId,
+      "status" to TransactionStatuses.FAILED.toString(),
+      "toEmail" to externalCreateTransactionDto.toEmail,
+      "fromEmail" to externalCreateTransactionDto.email!!,
+      "currency" to externalCreateTransactionDto.currency.toString(),
+      "bank" to externalCreateTransactionDto.bank,
+      "iban" to externalCreateTransactionDto.iban,
+      "toIban" to externalCreateTransactionDto.toIban,
+      "merchantTransfer" to externalCreateTransactionDto.merchantTransfer.toString()
+    )
+
+    val jsonString = this.objectMapper.writeValueAsString(hashmapToLog);
+    this.logger.info("Transaction has failed for = \n{}", jsonString)
+  }
 
   @PostMapping
   // Require Authorization with custom Annotation
   fun createExternalTransfer(
-    @RequestBody request: ExternalCreateTransactionDto,
+    @Valid @RequestBody request: ExternalCreateTransactionDto,
 
     @RequestHeader("Authorization") authorizationHeader: String,
   ) {
-    val restTemplate = RestTemplate() // Rest Template for providing webhooks to the external provider.
+    print(request.toString())
+    val restTemplate = RestTemplate()
     val existingExternalAccountCheck = this.externalAccountService.checkForExternalAccount(request.iban)
+    println(existingExternalAccountCheck)
 
-    // If the First Time Transaction from external sources we create an entity for that customer.
-    if (existingExternalAccountCheck == null) {
+    val externalAccountEntity = if (existingExternalAccountCheck == null) {
       val externalAccountBilling = ExternalAccountBilling(
         city = request.externalAccountBilling.city,
         country = request.externalAccountBilling.country,
@@ -55,31 +89,37 @@ class ExternalTransferController(
         bank = request.bank,
         iban = request.iban,
         dateOfBirth = request.dateOfBirth,
-        externalAccountBilling = externalAccountBilling
+        externalAccountBilling = externalAccountBilling,
+        currency = request.currency
       )
 
-      val externalAccountEntity = this.externalAccountService.createExternalAccount(externalAccount)
+      this.externalAccountService.createExternalAccount(externalAccount)
+    } else {
+      existingExternalAccountCheck
+    }
 
-      val transactionType = // Defining the Transaction type in here
-        if (request.merchantTransfer) TransactionTypes.EXTERNALTOMERCHANT else TransactionTypes.EXTERNALTOUSER
+    val transactionType =
+      if (request.merchantTransfer) TransactionTypes.EXTERNALTOMERCHANT else TransactionTypes.EXTERNALTOUSER
 
-      val transferFundsDto = TransferFundsDto(
-        amount = request.amount,
-        currency = request.currency,
-        fromExternal = externalAccountEntity,
-        toAccountNumber = request.toIban,
-        transactionType = transactionType
-      )
+    val transferFundsDto = TransferFundsDto(
+      amount = request.amount,
+      currency = request.currency,
+      fromExternal = externalAccountEntity,
+      toAccountNumber = request.toIban,
+      transactionType = transactionType,
+      fromEmail = request.email,
+      toEmail = request.toEmail,
+    )
 
-      try {
-        this.accountServiceImpl.transferFunds(transferFundsDto)
-        this.externalAccountService.createExternalAccountTransaction(request)
-      } catch (e: IllegalStateException ){
-        // Handle Failed transaction logic storing it in both internal transactions database as well as external Transactions database
-      }
+    try {
+      val transactionEntity = this.accountServiceImpl.transferFunds(transferFundsDto)
+      val externalAccountTransactionEntity =
+        this.externalAccountService.createExternalAccountTransaction(request, transactionEntity)
 
-      // Defining the logic of storing the ExternalTransfer separately And Sending a webhook to the user
-
+    } catch (e: IllegalStateException) {
+      this.logger.info("Transaction Failed with cause {}", e.message)
+      this.assembleFailedTransactionLog(request)
+      this.transactionService.handleFailedTransaction(transferFundsDto)
     }
 
   }
