@@ -1,17 +1,20 @@
 package com.nompay.banking_universal.services.impl
 
 import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
+import com.nompay.banking_universal.repositories.dto.account.CreateMerchantAccountDto
 import com.nompay.banking_universal.repositories.dto.account.FindAccountsToTransferDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsInternallyDto
-import com.nompay.banking_universal.repositories.dto.transactions.CreateTransactionDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.AccountEntityRepository
+import com.nompay.banking_universal.repositories.entities.MerchantEntity
+import com.nompay.banking_universal.repositories.entities.MerchantEntityRepository
 import com.nompay.banking_universal.repositories.entities.TransactionEntity
+import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
-import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import com.nompay.banking_universal.services.AccountService
+import com.nompay.banking_universal.services.MerchantService
 import com.nompay.banking_universal.utils.impl.IBANServiceImpl
 import com.nompay.banking_universal.utils.impl.SessionServiceImpl
 import org.apache.coyote.BadRequestException
@@ -20,7 +23,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.util.UUID
 
 @Service
 class AccountServiceImpl(
@@ -29,6 +31,10 @@ class AccountServiceImpl(
   private val accountRepository: AccountEntityRepository,
 
   private val userRepository: UserEntityRepository,
+
+  private val merchantRepository: MerchantEntityRepository,
+
+  private val merchantService: MerchantService,
 
   private val externalAccountService: ExternalAccountServiceImpl,
 
@@ -76,6 +82,27 @@ class AccountServiceImpl(
     this.accountRepository.save(account);
 
     return account
+  }
+
+  override fun createMerchantAccount(createMerchantAccountDto: CreateMerchantAccountDto): AccountEntity {
+    val merchant = this.merchantService.getMerchantById(createMerchantAccountDto.merchantId!!)
+
+    val merchantAccount = AccountEntity(
+      name = createMerchantAccountDto.name!!,
+      email = createMerchantAccountDto.email!!,
+      ownerMerchant = merchant,
+      currency = createMerchantAccountDto.currency!!,
+      iban = this.ibanService.generateAccountIBAN(),
+      accountType = createMerchantAccountDto.accountType
+    )
+
+    val merchantAccountEntity = this.accountRepository.save<AccountEntity>(merchantAccount)
+
+    merchant.merchantAccounts.add(merchantAccountEntity) // Adding an account to the merchant accounts list
+
+    this.merchantRepository.save<MerchantEntity>(merchant) // Updating the existing merchant with an updated bound accounts list
+
+    return merchantAccountEntity
   }
 
   override fun findAccountsToTransfer(findAccountsToTransferDto: FindAccountsToTransferDto): List<AccountEntity> {
@@ -156,58 +183,17 @@ class AccountServiceImpl(
     }
 
     val transaction =
-      this.constructTransactionPerTransactionType(transactionType, fromAccount, toAccount, transferFundsDto)
+      this.transactionService.constructTransactionPerTransactionType(
+        transactionType,
+        fromAccount,
+        toAccount,
+        transferFundsDto
+      )
     println("printing transaction inhere..")
     println(transaction)
     val transactionEntity = this.transactionService.createTransaction(transaction)
     return transactionEntity
   }
-
-  // Function that constructs relevant transaction Dto to create a transaction Entity
-  private fun constructTransactionPerTransactionType(
-    transactionType: TransactionTypes,
-    fromAccount: AccountEntity?,
-    toAccount: AccountEntity?,
-    transferFundsDto: TransferFundsDto,
-  ): CreateTransactionDto {
-    return when (transactionType) {
-      TransactionTypes.USERTOUSER -> {
-        return CreateTransactionDto.Builder()
-          .withFromUser(fromAccount?.ownerUser)
-          .withToUser(toAccount?.ownerUser)
-          .withFromEmail(fromAccount?.email!!)
-          .withToEmail(toAccount?.email!!)
-          .withFromAccount(fromAccount)
-          .withToAccount(toAccount)
-          .withTransactionType(transactionType)
-          .withTransactionId(UUID.randomUUID().toString())
-          .withCurrency(transferFundsDto.currency)
-          .withAmount(transferFundsDto.amount)
-          .withStatus(TransactionStatuses.SUCCESS)
-          .withDescription(transferFundsDto.transferDescription)
-          .build()
-      }
-
-      TransactionTypes.EXTERNALTOUSER -> {
-        return CreateTransactionDto.Builder()
-          .withToUser(toAccount?.ownerUser)
-          .withFromEmail(transferFundsDto.fromExternal?.email!!)
-          .withToEmail(toAccount?.email!!)
-          .withFromExternal(transferFundsDto.fromExternal)
-          .withToAccount(toAccount)
-          .withTransactionType(transactionType)
-          .withTransactionId(UUID.randomUUID().toString())
-          .withCurrency(transferFundsDto.currency)
-          .withAmount(transferFundsDto.amount)
-          .withStatus(TransactionStatuses.SUCCESS)
-          .withDescription(transferFundsDto.transferDescription)
-          .build()
-      }
-
-      else -> throw IllegalArgumentException("Incorrect transaction type provided")
-    }
-  }
-
 
   override fun transferFundsInternally(transferFundInternallyDto: TransferFundsInternallyDto): String {
     TODO("Not yet implemented")

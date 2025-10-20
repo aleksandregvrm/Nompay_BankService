@@ -3,6 +3,7 @@ package com.nompay.banking_universal.repositories.entities
 import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import jakarta.persistence.*
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import java.sql.Date
 import java.time.Instant
 
@@ -90,12 +91,12 @@ class UserEntity(
         "updateDate=$updateDate)" // Accounts are removed here
   }
 
-  fun addAccount(account: AccountEntity){
+  fun addAccount(account: AccountEntity) {
     this.accounts.add(account);
     account.ownerUser = this
   }
 
-  fun removeAccount(account: AccountEntity){
+  fun removeAccount(account: AccountEntity) {
     this.accounts.remove(account)
     account.ownerUser = null
   }
@@ -104,4 +105,7 @@ class UserEntity(
 interface UserEntityRepository : JpaRepository<UserEntity, Long> {
   fun findUserByEmailIgnoreCase(email: String): UserEntity?
   fun findUserByUsername(username: String): UserEntity?
+
+  @Query("SELECT u FROM UserEntity u WHERE u.id IN :userIds")
+  fun findUsersByUserIds(userIds: List<Long>): List<UserEntity>?
 }

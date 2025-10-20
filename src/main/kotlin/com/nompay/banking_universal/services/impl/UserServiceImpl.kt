@@ -1,6 +1,5 @@
 package com.nompay.banking_universal.services.impl
 
-import com.auth0.jwt.exceptions.JWTVerificationException
 import com.nompay.banking_universal.repositories.dto.user.CreateUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserReturnDto
@@ -18,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Date
+import kotlin.jvm.optionals.toList
 
 @Service
 class UserServiceImpl(
@@ -50,10 +50,33 @@ class UserServiceImpl(
     return user;
   }
 
-  // Internal function that looks for the user based on the userId
-  fun getUserByUserId(userId: Long): UserEntity? {
+  // function that looks for the user based on the userId
+  override fun getUserByUserId(userId: Long): UserEntity? {
     val user: UserEntity? = userRepository.findById(userId).orElse(null);
     return user
+  }
+
+  // function that looks for the users with the ids provided in the listß
+  override fun getUsersByUserId(userIds: List<Long>?): List<UserEntity>? {
+    if (userIds.isNullOrEmpty()) {
+      throw IllegalArgumentException("Empty UserIds provided ${userIds}")
+    }
+
+    if (userIds.size == 1) {
+      val userId: Long = userIds[0]
+      return this.userRepository.findById(userId).toList() // Getting and appending the found user to the list...
+    }
+    val users = this.userRepository.findUsersByUserIds(userIds)
+
+    if (users.isNullOrEmpty()) {
+      throw IllegalArgumentException("No Users found with the userIds - ${userIds}")
+    }
+
+    if (users.size != userIds.size) {
+      throw IllegalArgumentException("Invalid amount of users found - ${users.size} for the asked amount of - ${userIds.size}")
+    }
+
+    return users
   }
 
   override fun updateUser(updateUserDto: UpdateUserDto): String {

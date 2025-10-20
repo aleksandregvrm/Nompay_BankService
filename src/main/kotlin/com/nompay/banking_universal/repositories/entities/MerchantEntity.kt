@@ -1,9 +1,12 @@
 package com.nompay.banking_universal.repositories.entities
 
+import com.nompay.banking_universal.repositories.dto.merchants.MerchantBilling
 import com.nompay.banking_universal.repositories.enums.merchants.MerchantStatuses
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
@@ -43,6 +46,7 @@ class MerchantEntity(
   val legalName: String,
 
   @Column(name = "merchant_status")
+  @Enumerated(EnumType.STRING)
   val status: MerchantStatuses,
 
   @Column(name = "email")
@@ -50,7 +54,7 @@ class MerchantEntity(
 
   @Column(name = "billing")
   @JdbcTypeCode(SqlTypes.JSON)
-  val billing: String,
+  val billing: MerchantBilling,
 ) {
   @Id
   @UuidGenerator
@@ -60,7 +64,7 @@ class MerchantEntity(
   @JoinTable(
     name = "merchant_accessor_user",
     joinColumns = [JoinColumn(name = "merchant_id")],
-    inverseJoinColumns = [JoinColumn(name = "user_id")]
+    inverseJoinColumns = [JoinColumn(name = "user_id")],
   )
   var accessorUsers: MutableList<UserEntity>? = mutableListOf()
 
@@ -74,6 +78,6 @@ class MerchantEntity(
   }
 }
 
-interface MerchantEntityRepository: JpaRepository<MerchantEntity, String>{
+interface MerchantEntityRepository : JpaRepository<MerchantEntity, String> {
 
 }

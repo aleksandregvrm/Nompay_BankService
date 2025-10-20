@@ -6,11 +6,15 @@ import com.nompay.banking_universal.repositories.dto.transactions.RetrieveTransa
 import com.nompay.banking_universal.services.TransactionService
 import com.nompay.banking_universal.repositories.dto.transactions.CreateTransactionDto
 import com.nompay.banking_universal.repositories.dto.transactions.ReTransferFundsDto
+import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.TransactionEntity
 import com.nompay.banking_universal.repositories.entities.TransactionEntityRepository
+import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
+import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class TransactionServiceImpl(
@@ -36,7 +40,8 @@ class TransactionServiceImpl(
       amount = createTransactionDto.amount,
       transactionId = createTransactionDto.transactionId
     ).apply {
-      this.transactionType = createTransactionDto.transactionType // Assigning the transaction Type of the payment transaction
+      this.transactionType =
+        createTransactionDto.transactionType // Assigning the transaction Type of the payment transaction
       this.transactionDescription = createTransactionDto.description
     }
 
@@ -63,4 +68,50 @@ class TransactionServiceImpl(
   override fun handleFailedTransaction(transferFundsDto: TransferFundsDto): ExternalNotificationDto {
     TODO("Not yet implemented")
   }
+
+  // Function that constructs relevant transaction Dto to create a transaction Entity
+  override fun constructTransactionPerTransactionType(
+    transactionType: TransactionTypes,
+    fromAccount: AccountEntity?,
+    toAccount: AccountEntity?,
+    transferFundsDto: TransferFundsDto,
+  ): CreateTransactionDto {
+    return when (transactionType) {
+      TransactionTypes.USERTOUSER -> {
+        return CreateTransactionDto.Builder()
+          .withFromUser(fromAccount?.ownerUser)
+          .withToUser(toAccount?.ownerUser)
+          .withFromEmail(fromAccount?.email!!)
+          .withToEmail(toAccount?.email!!)
+          .withFromAccount(fromAccount)
+          .withToAccount(toAccount)
+          .withTransactionType(transactionType)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
+
+      TransactionTypes.EXTERNALTOUSER -> {
+        return CreateTransactionDto.Builder()
+          .withToUser(toAccount?.ownerUser)
+          .withFromEmail(transferFundsDto.fromExternal?.email!!)
+          .withToEmail(toAccount?.email!!)
+          .withFromExternal(transferFundsDto.fromExternal)
+          .withToAccount(toAccount)
+          .withTransactionType(transactionType)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
+
+      else -> throw IllegalArgumentException("Incorrect transaction type provided")
+    }
+  }
+
 }
