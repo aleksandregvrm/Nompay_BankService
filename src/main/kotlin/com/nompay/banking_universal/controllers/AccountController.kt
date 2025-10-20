@@ -1,6 +1,6 @@
 package com.nompay.banking_universal.controllers
 
-import com.nompay.banking_universal.annotations.graphAuth.RequiresAuth
+import com.nompay.banking_universal.annotations.graphAuth.RequiresAuthGraph
 import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
@@ -16,7 +16,7 @@ class AccountController(
 ) {
 
   @MutationMapping(name = "createAccount")
-  @RequiresAuth
+  @RequiresAuthGraph
   fun createAccount(
     @Argument("input") input: CreateAccountDto,
   ): AccountEntity {
@@ -24,7 +24,7 @@ class AccountController(
   }
 
   @MutationMapping(name = "transferFunds")
-  @RequiresAuth
+  @RequiresAuthGraph
   fun transferFund(
     @Argument("input") input: TransferFundsDto,
   ): TransactionEntity {

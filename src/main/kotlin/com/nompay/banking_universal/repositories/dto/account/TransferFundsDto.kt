@@ -22,9 +22,9 @@ data class TransferFundsDto(
 
   val toEmail: String? = null,
 
-  val fromMerchant: String? = null,
+  val fromMerchantId: String? = null,
 
-  val toMerchant: String? = null,
+  val toMerchantId: String? = null,
 
   val fromExternal: ExternalAccountEntity? = null,
 

@@ -73,4 +73,5 @@ class AccountEntity(
 interface AccountEntityRepository : JpaRepository<AccountEntity, Long> {
   fun getAccountsByEmail(email: String): List<AccountEntity>?
   fun getAccountByIban(iban: String): AccountEntity?
+  fun getAccountByOwnerMerchantId(ownerMerchantId: String): AccountEntity?
 }

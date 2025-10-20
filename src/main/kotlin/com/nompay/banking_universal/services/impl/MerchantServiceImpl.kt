@@ -5,7 +5,6 @@ import com.nompay.banking_universal.repositories.entities.MerchantEntity
 import com.nompay.banking_universal.repositories.entities.MerchantEntityRepository
 import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.repositories.enums.merchants.MerchantStatuses
-import com.nompay.banking_universal.services.AccountService
 import com.nompay.banking_universal.services.MerchantService
 import com.nompay.banking_universal.services.UserService
 import org.springframework.stereotype.Service
@@ -15,9 +14,7 @@ class MerchantServiceImpl(
   private val merchantEntityRepository: MerchantEntityRepository,
 
   private val userService: UserService,
-
-  private val accountService: AccountService
-) : MerchantService {
+  ) : MerchantService {
 
   override fun createMerchant(createMerchantDto: CreateMerchantDto): MerchantEntity {
     val (ownerUserId, accessorUsers, legalName) = createMerchantDto

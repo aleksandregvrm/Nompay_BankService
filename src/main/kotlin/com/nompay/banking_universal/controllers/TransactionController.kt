@@ -1,6 +1,6 @@
 package com.nompay.banking_universal.controllers
 
-import com.nompay.banking_universal.annotations.graphAuth.RequiresAuth
+import com.nompay.banking_universal.annotations.graphAuth.RequiresAuthGraph
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
 
@@ -8,19 +8,19 @@ import org.springframework.stereotype.Controller
 class TransactionController {
 
   @QueryMapping(name = "retrieveOneTransaction")
-  @RequiresAuth
+  @RequiresAuthGraph
   fun retrieveOneTransaction(){
 
   }
 
   @QueryMapping(name = "retrieveAllUserTransactions")
-  @RequiresAuth
+  @RequiresAuthGraph
   fun retrieveAllUserTransaction(){
 
   }
 
   @QueryMapping(name = "retryTransaction")
-  @RequiresAuth
+  @RequiresAuthGraph
   fun retryTransaction(){
 
   }

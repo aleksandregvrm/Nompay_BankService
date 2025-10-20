@@ -6,6 +6,7 @@ import com.nompay.banking_universal.repositories.dto.transactions.CreateTransact
 import com.nompay.banking_universal.repositories.dto.transactions.ReTransferFundsDto
 import com.nompay.banking_universal.repositories.dto.transactions.RetrieveTransactionsDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
+import com.nompay.banking_universal.repositories.entities.MerchantEntity
 import com.nompay.banking_universal.repositories.entities.TransactionEntity
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 
@@ -18,6 +19,8 @@ interface TransactionService {
     transactionType: TransactionTypes,
     fromAccount: AccountEntity?,
     toAccount: AccountEntity?,
+    toMerchant: MerchantEntity?,
+    fromMerchant: MerchantEntity?,
     transferFundsDto: TransferFundsDto,
   ): CreateTransactionDto // Used for differentiation between different Transaction Types, Constructing Transaction Data Class
   // according to that

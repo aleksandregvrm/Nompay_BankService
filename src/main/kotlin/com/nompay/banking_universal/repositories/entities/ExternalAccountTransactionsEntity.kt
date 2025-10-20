@@ -86,7 +86,7 @@ class ExternalAccountTransactionsEntity(
 
   @ManyToOne
   @JoinColumn(name = "owner_external_account")
-  val ownerExternalAccount: ExternalAccountEntity? = null
+  var ownerExternalAccount: ExternalAccountEntity? = null
 
   @Column(name = "create_date", nullable = false)
   var createDate: Instant? = null

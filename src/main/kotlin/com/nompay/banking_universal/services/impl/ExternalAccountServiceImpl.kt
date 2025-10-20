@@ -52,6 +52,7 @@ class ExternalAccountServiceImpl(
   @Transactional
   override fun createExternalAccountTransaction(
     externalAccountTransactionDto: ExternalCreateTransactionDto,
+    externalAccount: ExternalAccountEntity,
     transactionEntity: TransactionEntity
   ): ExternalAccountTransactionsEntity {
     val externalAccountTransaction: ExternalAccountTransactionsEntity = ExternalAccountTransactionsEntity(
@@ -72,7 +73,10 @@ class ExternalAccountServiceImpl(
       notificationUrl = externalAccountTransactionDto.notificationUrl,
       referencedTransaction = transactionEntity,
       transactionId = transactionEntity.transactionId
-    )
+    ).apply {
+      this.ownerExternalAccount = externalAccount
+    }
+
     externalAccountTransaction.referencedTransaction =
       return this.externalAccountTransactionEntity.save<ExternalAccountTransactionsEntity>(externalAccountTransaction)
   }

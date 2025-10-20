@@ -66,11 +66,9 @@ class UserServiceImpl(
       val userId: Long = userIds[0]
       return this.userRepository.findById(userId).toList() // Getting and appending the found user to the list...
     }
-    val users = this.userRepository.findUsersByUserIds(userIds)
 
-    if (users.isNullOrEmpty()) {
-      throw IllegalArgumentException("No Users found with the userIds - ${userIds}")
-    }
+    val users = this.userRepository.findUsersByUserIds(userIds)
+      ?: throw IllegalArgumentException("No Users found with the userIds - ${userIds}")
 
     if (users.size != userIds.size) {
       throw IllegalArgumentException("Invalid amount of users found - ${users.size} for the asked amount of - ${userIds.size}")
@@ -127,7 +125,7 @@ class UserServiceImpl(
 
     if (!this.passwordService.verifyPassword(password!!, user.password)) {
       throw IllegalArgumentException("Invalid Credentials")
-    } // Checking wether the password is correct...
+    } // Checking whether the password is correct...
 
     val tokens: Pair<String, String> = this.sessionService.generateSession(user)
 

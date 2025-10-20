@@ -10,7 +10,6 @@ import com.nompay.banking_universal.repositories.entities.AccountEntityRepositor
 import com.nompay.banking_universal.repositories.entities.MerchantEntity
 import com.nompay.banking_universal.repositories.entities.MerchantEntityRepository
 import com.nompay.banking_universal.repositories.entities.TransactionEntity
-import com.nompay.banking_universal.repositories.entities.UserEntity
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import com.nompay.banking_universal.services.AccountService
@@ -111,14 +110,14 @@ class AccountServiceImpl(
 
   @Transactional
   override fun transferFunds(transferFundsDto: TransferFundsDto): TransactionEntity {
-    val (amount, currency, fromEmail, toEmail, fromMerchant, toMerchant,
+    val (amount, currency, fromEmail, toEmail, fromMerchantId, toMerchantId,
       fromExternal, toExternal, fromAccountNumber, toAccountNumber, transactionType, transferDescription) = transferFundsDto
-    println(transferFundsDto)
 
     val transfersFromExternal = this.externalTransferSourceCheck["fromExternal"] ?: emptySet()
     val transfersToExternal = this.externalTransferSourceCheck["toExternal"] ?: emptySet()
 
     val fromAccount: AccountEntity? = when {
+      !fromMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(fromMerchantId)
       transfersFromExternal.contains(transactionType) -> null
       !fromAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(fromAccountNumber)
       !fromEmail.isNullOrBlank() && currency != null -> {
@@ -133,6 +132,7 @@ class AccountServiceImpl(
     }
 
     val toAccount: AccountEntity? = when {
+      !toMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(toMerchantId)
       transfersToExternal.contains(transactionType) -> null
       !toAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(toAccountNumber)
       !toEmail.isNullOrBlank() && currency != null -> {
@@ -141,6 +141,23 @@ class AccountServiceImpl(
 
       else -> throw IllegalArgumentException("Destination account details are required.")
     }
+
+    // Check for the merchant involvement in the transaction
+    val checkAndGetMerchants: (String?, String?) -> Pair<MerchantEntity?, MerchantEntity?> = { fromId, toId ->
+
+      val fromMerchant = fromId?.let {
+        merchantRepository.findById(it).orElse(null)
+      } // Validating whether from merchant id is provided if yes Merchant entity is returned, if not null is returned
+
+      val toMerchant = toId?.let {
+        merchantRepository.findById(it).orElse(null)
+      } // Validating whether to merchant id is provided if yes Merchant entity is returned, if not null is returned
+
+      Pair(fromMerchant, toMerchant) // returning Pair for convinience
+    }
+
+    // Here we either get 0,1,2 Merchant entities
+    val (fromMerchant, toMerchant) = checkAndGetMerchants(fromMerchantId, toMerchantId)
 
     if (!transfersToExternal.contains(transactionType) && toAccount == null) {
       throw IllegalStateException("Destination account not found.")
@@ -187,10 +204,11 @@ class AccountServiceImpl(
         transactionType,
         fromAccount,
         toAccount,
+        fromMerchant,
+        toMerchant,
         transferFundsDto
       )
-    println("printing transaction inhere..")
-    println(transaction)
+
     val transactionEntity = this.transactionService.createTransaction(transaction)
     return transactionEntity
   }

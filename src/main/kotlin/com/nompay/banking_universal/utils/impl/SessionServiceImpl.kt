@@ -78,4 +78,14 @@ class SessionServiceImpl(
   private fun checkUserRole(userData: DecodedJWT): UserRoles {
     TODO()
   }
+
+  // Externally integrated API-s
+
+  override fun checkExternalTokenValidity(token: String, integrationId: String): Boolean {
+    TODO("Not yet implemented")
+  }
+
+  override fun generateExternalToken(integrationId: String): String {
+    TODO("Not yet implemented")
+  }
 }

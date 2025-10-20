@@ -11,6 +11,7 @@ interface ExternalAccountService {
   fun createExternalAccount(externalAccountInfo: ExternalAccountDto): ExternalAccountEntity
   fun createExternalAccountTransaction(
     externalAccountTransactionDto: ExternalCreateTransactionDto,
+    externalAccount: ExternalAccountEntity,
     transactionEntity: TransactionEntity
   ): ExternalAccountTransactionsEntity
 

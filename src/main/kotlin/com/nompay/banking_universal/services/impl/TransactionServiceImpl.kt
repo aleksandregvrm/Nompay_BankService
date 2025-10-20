@@ -7,6 +7,7 @@ import com.nompay.banking_universal.services.TransactionService
 import com.nompay.banking_universal.repositories.dto.transactions.CreateTransactionDto
 import com.nompay.banking_universal.repositories.dto.transactions.ReTransferFundsDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
+import com.nompay.banking_universal.repositories.entities.MerchantEntity
 import com.nompay.banking_universal.repositories.entities.TransactionEntity
 import com.nompay.banking_universal.repositories.entities.TransactionEntityRepository
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionStatuses
@@ -74,6 +75,8 @@ class TransactionServiceImpl(
     transactionType: TransactionTypes,
     fromAccount: AccountEntity?,
     toAccount: AccountEntity?,
+    fromMerchant: MerchantEntity?,
+    toMerchant: MerchantEntity?,
     transferFundsDto: TransferFundsDto,
   ): CreateTransactionDto {
     return when (transactionType) {
@@ -102,6 +105,22 @@ class TransactionServiceImpl(
           .withFromExternal(transferFundsDto.fromExternal)
           .withToAccount(toAccount)
           .withTransactionType(transactionType)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
+
+      TransactionTypes.EXTERNALTOMERCHANT -> {
+        return CreateTransactionDto.Builder()
+          .withToMerchant(toMerchant)
+          .withFromEmail(transferFundsDto.fromExternal?.email!!)
+          .withToEmail(toMerchant?.email!!)
+          .withFromExternal(transferFundsDto.fromExternal)
+          .withToAccount(toAccount)
+          .withTransactionType(TransactionTypes.EXTERNALTOMERCHANT)
           .withTransactionId(UUID.randomUUID().toString())
           .withCurrency(transferFundsDto.currency)
           .withAmount(transferFundsDto.amount)

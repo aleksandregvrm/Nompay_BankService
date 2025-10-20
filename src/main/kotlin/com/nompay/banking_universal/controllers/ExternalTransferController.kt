@@ -2,6 +2,7 @@ package com.nompay.banking_universal.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.nompay.banking_universal.annotations.restAuth.RequiresAuthRest
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalAccountBilling
 import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalAccountDto
@@ -60,7 +61,7 @@ class ExternalTransferController(
   }
 
   @PostMapping
-  // Require Authorization with custom Annotation
+  @RequiresAuthRest // Custom Rest Auth annotation, That Authorizes the route for the user
   fun createExternalTransfer(
     @Valid @RequestBody request: ExternalCreateTransactionDto,
 
@@ -114,7 +115,7 @@ class ExternalTransferController(
     try {
       val transactionEntity = this.accountServiceImpl.transferFunds(transferFundsDto)
       val externalAccountTransactionEntity =
-        this.externalAccountService.createExternalAccountTransaction(request, transactionEntity)
+        this.externalAccountService.createExternalAccountTransaction(request, existingExternalAccountCheck!!, transactionEntity)
 
     } catch (e: IllegalStateException) {
       this.logger.info("Transaction Failed with cause {}", e.message)

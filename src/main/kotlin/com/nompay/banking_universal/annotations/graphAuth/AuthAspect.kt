@@ -14,7 +14,7 @@ import org.springframework.util.MultiValueMap
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class RequiresAuth
+annotation class RequiresAuthGraph
 
 /**
  * Aspect that implements the authorization middleware logic.

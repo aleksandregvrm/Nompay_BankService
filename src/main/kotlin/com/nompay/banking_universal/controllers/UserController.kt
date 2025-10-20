@@ -1,6 +1,6 @@
 package com.nompay.banking_universal.controllers
 
-import com.nompay.banking_universal.annotations.graphAuth.RequiresAuth
+import com.nompay.banking_universal.annotations.graphAuth.RequiresAuthGraph
 import com.nompay.banking_universal.repositories.dto.user.CreateUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserReturnDto
@@ -27,7 +27,7 @@ class UserController(
   }
 
   @MutationMapping(name = "logoutUser")
-  @RequiresAuth
+  @RequiresAuthGraph
   fun logoutUser(
     @Argument("userId") userId: Int,
     environment: DataFetchingEnvironment
