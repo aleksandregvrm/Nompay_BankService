@@ -39,8 +39,7 @@ class TransactionServiceImpl(
       this.transactionType = createTransactionDto.transactionType // Assigning the transaction Type of the payment transaction
       this.transactionDescription = createTransactionDto.description
     }
-    println(transactionEntity)
-    println("logging transaction entity in here...")
+
     this.transactionEntityRepository.save<TransactionEntity>(transactionEntity)
 
     this.logger.info(

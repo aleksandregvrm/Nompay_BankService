@@ -97,6 +97,7 @@ class AccountServiceImpl(
       !fromEmail.isNullOrBlank() && currency != null -> {
         this.accountRepository.getAccountsByEmail(fromEmail)?.firstOrNull { it.currency == currency }
       }
+
       else -> throw IllegalArgumentException("Source account details are required.")
     }
 
@@ -110,6 +111,7 @@ class AccountServiceImpl(
       !toEmail.isNullOrBlank() && currency != null -> {
         this.accountRepository.getAccountsByEmail(toEmail)?.firstOrNull { it.currency == currency }
       }
+
       else -> throw IllegalArgumentException("Destination account details are required.")
     }
 
@@ -153,35 +155,59 @@ class AccountServiceImpl(
       this.accountRepository.save(toAccount)
     }
 
-    println(fromExternal)
-    println(toAccount)
-    println(currency)
-    println(transactionType)
-    println(transferFundsDto.transferDescription)
-
-    val transaction = CreateTransactionDto.Builder()
-      .withFromUser(fromAccount?.ownerUser)
-      .withToUser(toAccount?.ownerUser)
-      .withFromEmail(fromAccount?.email ?: fromExternal?.email!!)
-      .withToEmail(toAccount?.email ?: toExternal?.email!!)
-      .withFromMerchant(fromAccount?.ownerMerchant)
-      .withToMerchant(toAccount?.ownerMerchant)
-      .withFromAccount(fromAccount)
-      .withFromExternal(fromExternal)
-      .withToAccount(toAccount)
-      .withToExternal(toExternal)
-      .withTransactionType(transactionType)
-      .withTransactionId(UUID.randomUUID().toString())
-      .withCurrency(currency)
-      .withAmount(amount)
-      .withStatus(TransactionStatuses.SUCCESS)
-      .withDescription(transferFundsDto.transferDescription)
-      .build()
+    val transaction =
+      this.constructTransactionPerTransactionType(transactionType, fromAccount, toAccount, transferFundsDto)
+    println("printing transaction inhere..")
     println(transaction)
-    println("printing transactions in here..")
     val transactionEntity = this.transactionService.createTransaction(transaction)
     return transactionEntity
   }
+
+  // Function that constructs relevant transaction Dto to create a transaction Entity
+  private fun constructTransactionPerTransactionType(
+    transactionType: TransactionTypes,
+    fromAccount: AccountEntity?,
+    toAccount: AccountEntity?,
+    transferFundsDto: TransferFundsDto,
+  ): CreateTransactionDto {
+    return when (transactionType) {
+      TransactionTypes.USERTOUSER -> {
+        return CreateTransactionDto.Builder()
+          .withFromUser(fromAccount?.ownerUser)
+          .withToUser(toAccount?.ownerUser)
+          .withFromEmail(fromAccount?.email!!)
+          .withToEmail(toAccount?.email!!)
+          .withFromAccount(fromAccount)
+          .withToAccount(toAccount)
+          .withTransactionType(transactionType)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
+
+      TransactionTypes.EXTERNALTOUSER -> {
+        return CreateTransactionDto.Builder()
+          .withToUser(toAccount?.ownerUser)
+          .withFromEmail(transferFundsDto.fromExternal?.email!!)
+          .withToEmail(toAccount?.email!!)
+          .withFromExternal(transferFundsDto.fromExternal)
+          .withToAccount(toAccount)
+          .withTransactionType(transactionType)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
+
+      else -> throw IllegalArgumentException("Incorrect transaction type provided")
+    }
+  }
+
 
   override fun transferFundsInternally(transferFundInternallyDto: TransferFundsInternallyDto): String {
     TODO("Not yet implemented")

@@ -19,8 +19,8 @@ data class CreateTransactionDto(
   val toMerchant: MerchantEntity?,
   val fromExternal: ExternalAccountEntity?,
   val toExternal: ExternalAccountEntity?,
-  val fromAccount: AccountEntity,
-  val toAccount: AccountEntity,
+  val fromAccount: AccountEntity?,
+  val toAccount: AccountEntity?,
   val transactionType: TransactionTypes,
   val transactionId: String,
   val currency: Currencies,
@@ -66,12 +66,12 @@ data class CreateTransactionDto(
 
     fun build(): CreateTransactionDto {
       return CreateTransactionDto(
-        fromUser = fromUser!!,
-        toUser = toUser!!,
+        fromUser = fromUser,
+        toUser = toUser,
         fromEmail = fromEmail!!,
         toEmail = toEmail!!,
-        fromAccount = fromAccount!!,
-        toAccount = toAccount!!,
+        fromAccount = fromAccount,
+        toAccount = toAccount,
         transactionId = transactionId!!,
         transactionType = transactionType!!,
         currency = currency!!,

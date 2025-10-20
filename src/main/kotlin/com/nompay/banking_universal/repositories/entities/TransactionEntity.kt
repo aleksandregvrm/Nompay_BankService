@@ -61,12 +61,12 @@ class TransactionEntity(
   val toEmail: String,
 
   @ManyToOne
-  @JoinColumn(name = "from_account_id", nullable = false)
-  val fromAccount: AccountEntity,
+  @JoinColumn(name = "from_account_id", nullable = true)
+  val fromAccount: AccountEntity? = null,
 
   @ManyToOne
-  @JoinColumn(name = "to_account_id", nullable = false)
-  val toAccount: AccountEntity,
+  @JoinColumn(name = "to_account_id", nullable = true)
+  val toAccount: AccountEntity? = null,
 
   @Column(name = "currency", nullable = false)
   @Enumerated(EnumType.STRING)
