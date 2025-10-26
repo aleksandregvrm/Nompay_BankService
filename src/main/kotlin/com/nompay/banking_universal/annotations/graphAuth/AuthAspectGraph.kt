@@ -52,7 +52,7 @@ class AuthAspect(
 
     val longUserId = userId
 
-    val requiredRoles = requiresAuthGraph.roles;
+    val requiredRoles = requiresAuthGraph.roles
 
     val isTokenValidAndOwned = this.sessionService.checkTokenValidity(token, longUserId, requiredRoles);
 

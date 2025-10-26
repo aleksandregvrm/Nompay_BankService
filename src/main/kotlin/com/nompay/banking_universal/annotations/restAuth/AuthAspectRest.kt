@@ -66,7 +66,11 @@ class AuthAspectRest(
       else -> throw IllegalStateException("User ID argument must be of type Int or Long.")
     }
 
-    val isTokenValidAndOwned = this.sessionService.checkTokenValidity(token, integrationId, listOf(UserRoles.FINANCIER)) // TODO!!! This aprt needs to be modified...
+    val isTokenValidAndOwned = this.sessionService.checkTokenValidity(
+      token,
+      integrationId,
+      arrayOf(UserRoles.FINANCIER)
+    ) // TODO!!! This aprt needs to be modified...
 
     if (!isTokenValidAndOwned) {
       throw SecurityException("Unauthorized error for user ID: $integrationId.")

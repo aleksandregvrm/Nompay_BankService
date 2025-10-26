@@ -30,8 +30,6 @@ class SessionServiceImpl(
 
   // Here we validate the token and check whether that token belongs to the username requesting it.
   override fun checkTokenValidity(token: String, userId: Long, permittedRoles: Array<UserRoles>): Boolean {
-    println(permittedRoles)
-    println("logging permitted user roles in here...")
     return try {
       val verifier = JWT.require(Algorithm.HMAC256(this.tokenSecret))
         .withIssuer(this.sessionGiverOrganization)
@@ -78,9 +76,9 @@ class SessionServiceImpl(
   }
 
   private fun checkUserRole(userData: DecodedJWT, permittedRoles: Array<UserRoles>): Unit {
-    val providedRole = userData.getClaim("role").asString();
-    println(providedRole)
-    println(permittedRoles)
+    // Checking if the role based Authorization is not enforced on the route.
+    val providedRole = if (!permittedRoles.isEmpty()) userData.getClaim("role").asString() else return;
+
     val permittedRoleNames = permittedRoles.map { it.name }
 
     if (permittedRoleNames.contains(providedRole)) {

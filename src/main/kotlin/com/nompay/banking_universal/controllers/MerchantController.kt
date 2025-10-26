@@ -16,7 +16,7 @@ class MerchantController(
 ) {
 
   @MutationMapping(name = "createMerchant")
-  @RequiresAuthGraph(roles = [UserRoles.FINANCIER]) // Permitted roles to access this route
+  @RequiresAuthGraph(roles = [UserRoles.FINANCIER, UserRoles.ADMIN]) // Permitted roles to access this route
   fun createMerchant(
     @Argument("userId") userId: Long,
     @Argument("input") input: CreateMerchantDto,
