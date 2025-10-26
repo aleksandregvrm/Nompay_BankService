@@ -1,5 +1,6 @@
 package com.nompay.banking_universal.annotations.restAuth
 
+import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import com.nompay.banking_universal.utils.SessionService
 import jakarta.servlet.http.HttpServletRequest
 import org.aspectj.lang.JoinPoint
@@ -65,7 +66,7 @@ class AuthAspectRest(
       else -> throw IllegalStateException("User ID argument must be of type Int or Long.")
     }
 
-    val isTokenValidAndOwned = this.sessionService.checkTokenValidity(token, integrationId)
+    val isTokenValidAndOwned = this.sessionService.checkTokenValidity(token, integrationId, listOf(UserRoles.FINANCIER)) // TODO!!! This aprt needs to be modified...
 
     if (!isTokenValidAndOwned) {
       throw SecurityException("Unauthorized error for user ID: $integrationId.")

@@ -29,13 +29,15 @@ class SessionServiceImpl(
 
 
   // Here we validate the token and check whether that token belongs to the username requesting it.
-  override fun checkTokenValidity(token: String, userId: Long): Boolean {
+  override fun checkTokenValidity(token: String, userId: Long, permittedRoles: Array<UserRoles>): Boolean {
+    println(permittedRoles)
+    println("logging permitted user roles in here...")
     return try {
       val verifier = JWT.require(Algorithm.HMAC256(this.tokenSecret))
         .withIssuer(this.sessionGiverOrganization)
         .build()
       val decodedJwt = verifier.verify(token);
-//      val checkForRole = this.checkUserRole(decodedJwt)
+      val checkForRole = this.checkUserRole(decodedJwt, permittedRoles)
       val tokenUserId = decodedJwt.subject;
       tokenUserId.equals(userId.toString(), ignoreCase = true)
     } catch (e: JWTVerificationException) {
@@ -51,9 +53,9 @@ class SessionServiceImpl(
    * @return
    * **/
   override fun generateSession(user: UserEntity): Pair<String, String> {
-    val accessToken = this.generateToken(user.id!!, Integer.parseInt(tokenValidityHours))
+    val accessToken = this.generateToken(user.id!!, Integer.parseInt(tokenValidityHours), user.role!!)
 
-    val refreshToken = this.generateToken(user.id!!, Integer.parseInt(tokenValidityHours) * 24 * 30)
+    val refreshToken = this.generateToken(user.id!!, Integer.parseInt(tokenValidityHours) * 24 * 30, user.role!!)
 
     val session = SessionEntity(
       accessToken = accessToken,
@@ -64,19 +66,28 @@ class SessionServiceImpl(
     return Pair(accessToken, refreshToken)
   }
 
-  override fun generateToken(userId: Long, validityHours: Int): String {
+  override fun generateToken(userId: Long, validityHours: Int, userRole: UserRoles): String {
     val now = UtilDate()
     val expiration = UtilDate(now.time + validityHours * 360000);
     return JWT.create()
       .withIssuer(this.sessionGiverOrganization)
       .withSubject(userId.toString())
-      .withClaim("role", UserRoles.USER.name)
+      .withClaim("role", userRole.name)
       .withExpiresAt(expiration)
       .sign(Algorithm.HMAC256(this.tokenSecret))
   }
 
-  private fun checkUserRole(userData: DecodedJWT): UserRoles {
-    TODO()
+  private fun checkUserRole(userData: DecodedJWT, permittedRoles: Array<UserRoles>): Unit {
+    val providedRole = userData.getClaim("role").asString();
+    println(providedRole)
+    println(permittedRoles)
+    val permittedRoleNames = permittedRoles.map { it.name }
+
+    if (permittedRoleNames.contains(providedRole)) {
+      return
+    }
+
+    throw SecurityException("Unauthorized role to access this route")
   }
 
   // Externally integrated API-s

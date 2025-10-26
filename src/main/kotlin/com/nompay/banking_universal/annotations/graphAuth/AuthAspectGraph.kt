@@ -1,5 +1,6 @@
 package com.nompay.banking_universal.annotations.graphAuth
 
+import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import com.nompay.banking_universal.utils.SessionService
 import graphql.schema.DataFetchingEnvironment
 import org.aspectj.lang.JoinPoint
@@ -14,7 +15,9 @@ import org.springframework.util.MultiValueMap
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class RequiresAuthGraph
+annotation class RequiresAuthGraph(
+  val roles: Array<UserRoles> = []
+)
 
 /**
  * Aspect that implements the authorization middleware logic.
@@ -26,16 +29,16 @@ class AuthAspect(
   private val sessionService: SessionService
 ) {
 
-  @Before("@annotation(com.nompay.banking_universal.annotations.graphAuth.RequiresAuth)")
-  fun checkAuthorization(joinPoints: JoinPoint){
+  @Before("@annotation(requiresAuthGraph)")
+  fun checkAuthorization(joinPoints: JoinPoint, requiresAuthGraph: RequiresAuthGraph) {
     val args = joinPoints.args;
 
-    val userId = args.filterIsInstance<Int>().firstOrNull();
+    val userId = args.filterIsInstance<Long>().firstOrNull();
 
     val environment = args.filterIsInstance<DataFetchingEnvironment>().firstOrNull()
 
     if (userId == null || environment == null) {
-      throw IllegalStateException("Method annotated with @RequiresAuth must contain a 'userId' Int argument and a 'DataFetchingEnvironment' argument.")
+      throw IllegalStateException("Method annotated with @RequiresAuth must contain a 'userId' Long argument and a 'DataFetchingEnvironment' argument.")
     }
 
     val headers: MultiValueMap<String, String> = environment.graphQlContext.get("headers")
@@ -45,11 +48,13 @@ class AuthAspect(
     if (authorizationHeader.isNullOrBlank() || !authorizationHeader.startsWith("Bearer")) {
       throw SecurityException("Authentication token not provided or invalid format.")
     }
-
     val token = authorizationHeader.substring("Bearer ".length);
-    val longUserId = userId.toLong()
 
-    val isTokenValidAndOwned = this.sessionService.checkTokenValidity(token, longUserId);
+    val longUserId = userId
+
+    val requiredRoles = requiresAuthGraph.roles;
+
+    val isTokenValidAndOwned = this.sessionService.checkTokenValidity(token, longUserId, requiredRoles);
 
     if (!isTokenValidAndOwned) {
       throw SecurityException("Unauthorized error for user ID: $userId.")

@@ -4,14 +4,14 @@ extend type Query {
 }
 
 extend type Mutation {
-    createMerchant(userId: Int!, input: CreateMerchantInput): Merchant!
-    addUserMerchant(userId: Int!, userToAddId: Int): String!
-    editMerchant(userId: Int!, input: EditMerchantInput): Merchant!
+    createMerchant(userId: Int!, input: CreateMerchantInput!): Merchant
+    addUserMerchant(userId: Int!, userToAddId: Int): String
+    editMerchant(userId: Int!, input: EditMerchantInput): Merchant
 }
 # Inputs
 input CreateMerchantInput {
     ownerUserId: Int!
-    accessorUsers: [Int]!
+    accessorUsers: [Int]
     legalName: String!
     email: String!
     billing: MerchantBillingInput!
@@ -44,14 +44,14 @@ enum MerchantStatus {
 # Types
 type Merchant {
     ownerUser: User!
-    accessorUsers: [User]!
-    merchantId: String!
-    merchantAccount: [Account]
+    accessorUsers: [User]
+    id: String!
+    merchantAccounts: [Account]
     legalName: String!
     status: MerchantStatus!
     createdAt: String!
     email: String!
-    billing: MerchantBilling
+    billing: MerchantBilling!
 }
 
 type MerchantBilling {

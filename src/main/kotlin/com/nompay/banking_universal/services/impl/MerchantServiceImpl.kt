@@ -17,12 +17,12 @@ class MerchantServiceImpl(
   ) : MerchantService {
 
   override fun createMerchant(createMerchantDto: CreateMerchantDto): MerchantEntity {
-    val (ownerUserId, accessorUsers, legalName) = createMerchantDto
+    val (ownerUserId, accessorUsers) = createMerchantDto
 
     val ownerUser = this.userService.getUserByUserId(ownerUserId)
       ?: throw IllegalArgumentException("No Owner user found - ${ownerUserId}");
 
-    val allAccessorUsers = this.userService.getUsersByUserId(accessorUsers) ?: listOf()
+    val allAccessorUsers = this.userService.getUsersByUserId(accessorUsers) ?: mutableListOf()
 
     val merchant = MerchantEntity(
       ownerUser = ownerUser,
@@ -35,7 +35,7 @@ class MerchantServiceImpl(
     }
 
     val merchantEntity = this.merchantEntityRepository.save<MerchantEntity>(merchant);
-
+    println(merchantEntity)
     return merchantEntity
   }
 

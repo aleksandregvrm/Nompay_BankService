@@ -76,6 +76,10 @@ class MerchantEntity(
     val now = Instant.now()
     createDate = now
   }
+
+  override fun toString(): String {
+    return "MerchantEntity(ownerUser=$ownerUser, merchantAccounts=$merchantAccounts, legalName='$legalName', status=$status, email='$email', billing=$billing, id=$id, accessorUsers=$accessorUsers, createDate=$createDate)"
+  }
 }
 
 interface MerchantEntityRepository : JpaRepository<MerchantEntity, String> {

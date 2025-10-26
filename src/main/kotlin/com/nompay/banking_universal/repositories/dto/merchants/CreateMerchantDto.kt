@@ -8,7 +8,7 @@ data class CreateMerchantDto(
   val ownerUserId: Long,
 
   @field:NotNull(message = "Please specify the accessor users")
-  val accessorUsers: List<Long>,
+  val accessorUsers: List<Long>? = listOf<Long>(),
 
   @field:NotBlank(message = "Please specify the legal name")
   val legalName: String,

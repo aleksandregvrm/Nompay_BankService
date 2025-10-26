@@ -59,7 +59,7 @@ class UserServiceImpl(
   // function that looks for the users with the ids provided in the listß
   override fun getUsersByUserId(userIds: List<Long>?): List<UserEntity>? {
     if (userIds.isNullOrEmpty()) {
-      throw IllegalArgumentException("Empty UserIds provided ${userIds}")
+      return null
     }
 
     if (userIds.size == 1) {
