@@ -1,5 +1,6 @@
 package com.nompay.banking_universal.services.impl
 
+import com.nompay.banking_universal.redis.RedisServiceImpl
 import com.nompay.banking_universal.repositories.dto.user.CreateUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserDto
 import com.nompay.banking_universal.repositories.dto.user.LoginUserReturnDto
@@ -28,7 +29,9 @@ class UserServiceImpl(
 
   private val userRepository: UserEntityRepository,
 
-  private val sessionRepository: SessionEntityRepository
+  private val sessionRepository: SessionEntityRepository,
+
+  private val cachingService: RedisServiceImpl
 ) : UserService {
 
   override fun createUser(createUserDto: CreateUserDto): UserEntity {
@@ -92,10 +95,14 @@ class UserServiceImpl(
       throw BadRequestException("User with user id - ${userId} Not found.")
     }
 
-    val userSession = this.sessionRepository.findByUserId(availableUserSession);
-    if (userSession == null) {
-      throw BadRequestException("User with user id - ${userId} is not active.")
+    val checkForActiveSessionCache = this.cachingService.getValue("${userId}_refreshToken")
+
+    val checkForActiveSessionDb = this.sessionRepository.findByUserId(availableUserSession)
+
+    if (checkForActiveSessionCache.toString().isBlank() && checkForActiveSessionDb.toString().isBlank()) {
+      throw BadRequestException("Cannot log out user with invalidated session")
     }
+
     try {
       sessionRepository.deleteByUserId(availableUserSession)
       return "User logged out."
@@ -137,7 +144,6 @@ class UserServiceImpl(
       .withUsername(user.username)
       .withTimeStamp(Date(System.currentTimeMillis()))
       .withAccessToken(accessToken)
-      .withRefreshToken(refreshToken)
       .build()
 
   }

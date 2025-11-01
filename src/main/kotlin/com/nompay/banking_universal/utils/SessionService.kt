@@ -7,6 +7,7 @@ interface SessionService {
   fun checkTokenValidity(token: String, userId: Long, permittedRoles: Array<UserRoles>): Boolean
   fun generateToken(userId: Long, validityHours: Int, userRole: UserRoles): String
   fun generateSession(user: UserEntity): Pair<String, String>
+  fun refreshSession(user: UserEntity): Pair<String, String>
 
   fun checkExternalTokenValidity(token: String, integrationId: String): Boolean
   fun generateExternalToken(integrationId: String): String

@@ -55,9 +55,8 @@ class AuthAspect(
     val requiredRoles = requiresAuthGraph.roles
 
     val isTokenValidAndOwned = this.sessionService.checkTokenValidity(token, longUserId, requiredRoles);
-
     if (!isTokenValidAndOwned) {
-      throw SecurityException("Unauthorized error for user ID: $userId.")
+      throw SecurityException("Unauthorized error for user ID: $userId.") // Genearl un
     }
   }
 }

@@ -14,9 +14,6 @@ import java.time.Instant
   ]
 )
 class SessionEntity(
-  @Column(name = "access_token")
-  val accessToken: String,
-
   @Column(name = "refresh_token")
   var refreshToken: String,
 
@@ -42,7 +39,7 @@ class SessionEntity(
   }
 
   override fun toString(): String {
-    return "SessionEntity(accessToken='$accessToken', refreshToken='$refreshToken', userId=$userId, id=$id, createDate=$createDate, updateDate=$updateDate)"
+    return "SessionEntity(refreshToken='$refreshToken', userId=$userId, id=$id, createDate=$createDate, updateDate=$updateDate)"
   }
 }
 
