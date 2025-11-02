@@ -130,7 +130,7 @@ class UserServiceImpl(
       throw IllegalArgumentException("User is already logged in")
     }
 
-    if (!this.passwordService.verifyPassword(password!!, user.password)) {
+    if (!this.passwordService.verifyPassword(password, user.password)) {
       throw IllegalArgumentException("Invalid Credentials")
     } // Checking whether the password is correct...
 

@@ -12,9 +12,13 @@ import com.nompay.banking_universal.repositories.entities.UserEntityRepository
 import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import com.nompay.banking_universal.utils.SessionService
 import org.apache.coyote.BadRequestException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.Date as UtilDate
 
 /**
@@ -38,7 +42,9 @@ class SessionServiceImpl(
   @Value("\${service.tokenSecret}")
   private val tokenSecret: String,
 
-  @Lazy private val cachingService: RedisServiceImpl // Using Redis to cache session related data...
+  @Lazy private val cachingService: RedisServiceImpl, // Using Redis to cache session related data...
+
+  private val logger: Logger = LoggerFactory.getLogger(SessionServiceImpl::class.java)
 ) : SessionService {
 
   // Used for regex validation of the patterns in the sentence. Mainly used in error handling
@@ -70,8 +76,8 @@ class SessionServiceImpl(
       var clientActionText: String = ""
       // Assigning an error message based on refresh token availability
       when (this.checkRefreshTokenExpiration(userId)) {
-        true -> clientActionText = "Please refresh the token"
-        false -> clientActionText = "Please re-login"
+        false -> clientActionText = "Please refresh the token"
+        true -> clientActionText = "Please re-login"
       }
 
       if (this.validateSentence(e.message)) throw JWTVerificationException("${e.message} - ${clientActionText}") else false
@@ -97,7 +103,7 @@ class SessionServiceImpl(
     )
 
     this.cachingService.setValue( // Caching the logged users refresh token
-      "${user.id}_refreshToken",
+      "${user.id}_refreshToken", // Defining refresh token key with userId and create date of the token...
       refreshToken,
       (tokenValidityHours * 24 * 30).toLong()
     )
@@ -107,25 +113,26 @@ class SessionServiceImpl(
   }
 
   //Function used for Checking Whether refreshToken has expired
+  @Transactional
   private fun checkRefreshTokenExpiration(userId: Long): Boolean {
-    if (this.cachingService.getValue("${userId}_refreshToken").toString().isBlank())
-      return true
-    else
-    // Removing refresh token if stored from the db as well
+    if (this.cachingService.getValue("${userId}_refreshToken") == null) {
+      // Removing refresh token if stored from the db as well
       this.removeSessionFromDbIfActive(userId)
-    return false
+      return true
+    } else {
+      // The token is valid...
+      return false
+    }
   }
 
   private fun removeSessionFromDbIfActive(userId: Long) {
-    val sessionUser = this.userEntity.findById(userId).orElse(null)
-
-    if (sessionUser == null) {
-      throw BadRequestException("User with user id - ${userId} Not found.")
+    val sessionUser = userEntity.findById(userId).orElseThrow {
+      BadRequestException("User with user id - $userId not found.")
     }
 
-    // Check whether user session has already been removed if yes we just proceed
-    val activeSession = this.sessionRepository.findByUserId(sessionUser) ?: return;
-    this.sessionRepository.delete(activeSession)
+    sessionRepository.findByUserId(sessionUser)?.let {
+      sessionRepository.deleteByUserId(sessionUser)
+    }
   }
 
   override fun refreshSession(user: UserEntity): Pair<String, String> {

@@ -30,6 +30,7 @@ Ensure you have the following installed:
 - **Other Tools:**
     - Docker `v28.0.0` or higher
     - GraphQL-Java `v24.0` or higher
+    - Redis `v8.2.2`
 
 ---
 

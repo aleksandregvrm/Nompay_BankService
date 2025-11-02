@@ -1,6 +1,7 @@
 package com.nompay.banking_universal.repositories.entities
 
 import jakarta.persistence.*
+import jakarta.transaction.Transactional
 import org.hibernate.annotations.UuidGenerator
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -46,6 +47,7 @@ class SessionEntity(
 interface SessionEntityRepository : JpaRepository<SessionEntity, String> {
   fun findByUserId(userId: UserEntity): SessionEntity?
 
+  @Transactional
   @Modifying
   @Query("DELETE FROM SessionEntity s WHERE s.userId = :userId")
   fun deleteByUserId(userId: UserEntity): Int

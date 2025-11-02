@@ -129,6 +129,14 @@ class TransactionServiceImpl(
           .build()
       }
 
+//      TransactionTypes.USERTOEXTERNAL -> {
+//        return CreateTransactionDto.Builder()
+//          .withFromUser(fromAccount?.ownerUser)
+//          .withToExternal()
+//          .withFromEmail(fromAccount.email)
+//          .
+//      }
+
       else -> throw IllegalArgumentException("Incorrect transaction type provided")
     }
   }
