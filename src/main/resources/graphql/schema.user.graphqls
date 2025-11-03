@@ -9,6 +9,7 @@ type Mutation {
     deleteUser(userId: Int!): String
     loginUser(input: LoginUserInput!): LoginUserOutput
     logoutUser(userId: Int!): String
+    refreshSession(userId: Int!): RefreshSessionReturn
 }
 
 type User {
@@ -48,6 +49,10 @@ type LoginUserOutput {
     username: String
     email: String
     timeStamp: String!
+}
+
+type RefreshSessionReturn {
+    accessToken: String!
 }
 
 

@@ -2,7 +2,6 @@ package com.nompay.banking_universal.repositories.entities
 
 import com.nompay.banking_universal.repositories.dto.externalAccount.ExternalAccountBilling
 import com.nompay.banking_universal.repositories.enums.other.Currencies
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue

@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.nompay.banking_universal.redis.RedisServiceImpl
+import com.nompay.banking_universal.repositories.dto.user.RefreshSessionReturnDto
 import com.nompay.banking_universal.repositories.entities.SessionEntity
 import com.nompay.banking_universal.repositories.entities.SessionEntityRepository
 import com.nompay.banking_universal.repositories.entities.UserEntity
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.util.Date as UtilDate
 
 /**
@@ -126,7 +126,7 @@ class SessionServiceImpl(
   }
 
   private fun removeSessionFromDbIfActive(userId: Long) {
-    val sessionUser = userEntity.findById(userId).orElseThrow {
+    val sessionUser = this.userEntity.findById(userId).orElseThrow {
       BadRequestException("User with user id - $userId not found.")
     }
 
@@ -135,8 +135,49 @@ class SessionServiceImpl(
     }
   }
 
-  override fun refreshSession(user: UserEntity): Pair<String, String> {
-    TODO("Not yet implemented")
+  /**
+   * This function refreshes the user session extending the refresh token validity by further timeframe
+   * and providing new access token
+   * @param userId
+   * @return
+   * **/
+  override fun refreshSession(userId: Long): RefreshSessionReturnDto {
+    val activeRefreshToken = this.cachingService.getValue("${userId}_refreshToken")
+
+    if(activeRefreshToken == null){
+      this.removeSessionFromDbIfActive(userId)
+      throw BadRequestException("Refresh token is no longer valid, Please re-login")
+    }
+
+    val sessionUser = userEntity.findById(userId).orElseThrow() {
+      throw BadRequestException("User with user Id - $userId not found.")
+    }
+
+    val userSession = this.sessionRepository.findByUserId(sessionUser)
+
+    if (userSession == null) {
+      throw BadRequestException("User session with user Id - $userId is not active")
+    }
+
+    this.cachingService.deleteKey("${userId}_refreshToken")
+
+    val tokenValidityHours = Integer.parseInt(tokenValidityHours);
+
+    val accessToken = this.generateToken(sessionUser.id!!, tokenValidityHours, sessionUser.role!!)
+
+    val refreshToken = this.generateToken(sessionUser.id!!, tokenValidityHours * 24 * 30, sessionUser.role!!)
+
+    this.cachingService.setValue(
+      "${sessionUser.id}_refreshToken",
+      refreshToken,
+      (tokenValidityHours * 24 * 30).toLong()
+    )
+
+    userSession.refreshToken = refreshToken
+
+    this.sessionRepository.saveAndFlush<SessionEntity>(userSession)
+
+    return RefreshSessionReturnDto(accessToken)
   }
 
   override fun generateToken(userId: Long, validityHours: Int, userRole: UserRoles): String {

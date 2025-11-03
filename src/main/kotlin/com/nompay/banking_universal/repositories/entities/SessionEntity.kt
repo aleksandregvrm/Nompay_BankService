@@ -39,6 +39,11 @@ class SessionEntity(
     updateDate = now
   }
 
+  @PreUpdate
+  fun preUpdate(){
+    updateDate = Instant.now()
+  }
+
   override fun toString(): String {
     return "SessionEntity(refreshToken='$refreshToken', userId=$userId, id=$id, createDate=$createDate, updateDate=$updateDate)"
   }
