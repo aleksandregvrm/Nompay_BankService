@@ -18,8 +18,5 @@ data class CreateMerchantAccountDto(
   @field:NotNull(message = "Please specify the currency")
   val currency: Currencies? = null,
 
-  @field:NotBlank(message = "Please specify the name")
-  val ownerMerchantId: String? = null,
-
   val accountType: AccountTypes = AccountTypes.MERCHANTACCOUNT,
 )

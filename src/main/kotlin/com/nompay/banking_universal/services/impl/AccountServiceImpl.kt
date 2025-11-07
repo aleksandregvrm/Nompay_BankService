@@ -49,6 +49,7 @@ class AccountServiceImpl(
   )
 ) : AccountService {
 
+  // Function used to create a user account
   override fun createAccount(createAccountDto: CreateAccountDto): AccountEntity {
     val ownerUser = userRepository.findUserByEmailIgnoreCase(createAccountDto.email)
       ?: throw BadRequestException("No User with such email found");
@@ -83,8 +84,22 @@ class AccountServiceImpl(
     return account
   }
 
-  override fun createMerchantAccount(createMerchantAccountDto: CreateMerchantAccountDto): AccountEntity {
+  override fun createMerchantAccount(createMerchantAccountDto: CreateMerchantAccountDto, userId: Long): AccountEntity {
     val merchant = this.merchantService.getMerchantById(createMerchantAccountDto.merchantId!!)
+
+    // Checking whether the user is authorized to create a merchant account. whether it is included in the merchant configuration
+    if (!merchant.ownerUser.id?.equals(userId)!! ||
+      (merchant.accessorUsers?.isNotEmpty()!! && merchant.accessorUsers?.map { it.id == userId }
+        ?.isEmpty()!!)
+    ) {
+      throw BadRequestException("Cannot create Merchant from Non-Authorized user")
+    }
+
+    val merchantAccounts: MutableList<AccountEntity> = merchant.merchantAccounts
+
+    if (merchantAccounts.filter { it.currency == createMerchantAccountDto.currency }.size > 2) {
+      throw BadRequestException("Cannot create 3 or more merchant accounts with the same currency of - ${createMerchantAccountDto.currency}")
+    }
 
     val merchantAccount = AccountEntity(
       name = createMerchantAccountDto.name!!,
@@ -113,34 +128,6 @@ class AccountServiceImpl(
     val (amount, currency, fromEmail, toEmail, fromMerchantId, toMerchantId,
       fromExternal, toExternal, fromAccountNumber, toAccountNumber, transactionType, transferDescription) = transferFundsDto
 
-    val transfersFromExternal = this.externalTransferSourceCheck["fromExternal"] ?: emptySet()
-    val transfersToExternal = this.externalTransferSourceCheck["toExternal"] ?: emptySet()
-
-    val fromAccount: AccountEntity? = when {
-      !fromMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(fromMerchantId)
-      transfersFromExternal.contains(transactionType) -> null
-      !fromAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(fromAccountNumber)
-      !fromEmail.isNullOrBlank() && currency != null -> {
-        this.accountRepository.getAccountsByEmail(fromEmail)?.firstOrNull { it.currency == currency }
-      }
-
-      else -> throw IllegalArgumentException("Source account details are required.")
-    }
-
-    if (!transfersFromExternal.contains(transactionType) && fromAccount == null) {
-      throw IllegalStateException("Source account not found.")
-    }
-
-    val toAccount: AccountEntity? = when {
-      !toMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(toMerchantId)
-      transfersToExternal.contains(transactionType) -> null
-      !toAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(toAccountNumber)
-      !toEmail.isNullOrBlank() && currency != null -> {
-        this.accountRepository.getAccountsByEmail(toEmail)?.firstOrNull { it.currency == currency }
-      }
-
-      else -> throw IllegalArgumentException("Destination account details are required.")
-    }
 
     // Check for the merchant involvement in the transaction
     val checkAndGetMerchants: (String?, String?) -> Pair<MerchantEntity?, MerchantEntity?> = { fromId, toId ->
@@ -158,6 +145,37 @@ class AccountServiceImpl(
 
     // Here we either get 0,1,2 Merchant entities
     val (fromMerchant, toMerchant) = checkAndGetMerchants(fromMerchantId, toMerchantId)
+
+    val transfersFromExternal = this.externalTransferSourceCheck["fromExternal"] ?: emptySet()
+    val transfersToExternal = this.externalTransferSourceCheck["toExternal"] ?: emptySet()
+
+    val fromAccount: AccountEntity? = when {
+      !fromMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(fromMerchantId)
+      transfersFromExternal.contains(transactionType) -> null
+      !fromAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(fromAccountNumber)
+      !fromMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(fromMerchantId)
+      !fromEmail.isNullOrBlank() && currency != null -> {
+        this.accountRepository.getAccountsByEmail(fromEmail)?.firstOrNull { it.currency == currency }
+      }
+
+      else -> throw IllegalArgumentException("Source account details are required.")
+    }
+
+    if (!transfersFromExternal.contains(transactionType) && fromAccount == null) {
+      throw IllegalStateException("Source account not found.")
+    }
+
+    val toAccount: AccountEntity? = when {
+      !toMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(toMerchantId)
+      transfersToExternal.contains(transactionType) -> null
+      !toAccountNumber.isNullOrBlank() -> this.accountRepository.getAccountByIban(toAccountNumber)
+      !fromMerchantId.isNullOrBlank() -> this.accountRepository.getAccountByOwnerMerchantId(toMerchantId!!)
+      !toEmail.isNullOrBlank() && currency != null -> {
+        this.accountRepository.getAccountsByEmail(toEmail)?.firstOrNull { it.currency == currency }
+      }
+
+      else -> throw IllegalArgumentException("Destination account details are required.")
+    }
 
     if (!transfersToExternal.contains(transactionType) && toAccount == null) {
       throw IllegalStateException("Destination account not found.")

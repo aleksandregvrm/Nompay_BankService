@@ -10,7 +10,7 @@ import com.nompay.banking_universal.repositories.entities.TransactionEntity
 
 interface AccountService {
   fun createAccount(createAccountDto: CreateAccountDto): AccountEntity
-  fun createMerchantAccount(createMerchantAccountDto: CreateMerchantAccountDto): AccountEntity
+  fun createMerchantAccount(createMerchantAccountDto: CreateMerchantAccountDto, userId: Long): AccountEntity
   fun findAccountsToTransfer(findAccountsToTransferDto: FindAccountsToTransferDto): List<AccountEntity>
   fun transferFunds(transferFundsDto: TransferFundsDto): TransactionEntity
   fun transferFundsInternally(transferFundInternallyDto: TransferFundsInternallyDto): String

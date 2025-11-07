@@ -61,7 +61,6 @@ class TransactionServiceImpl(
     TODO("Not yet implemented")
   }
 
-
   override fun retrieveAllUserTransactions(retrieveTransactionsDto: RetrieveTransactionsDto): List<TransactionEntity> {
     TODO("Not yet implemented")
   }
@@ -129,13 +128,55 @@ class TransactionServiceImpl(
           .build()
       }
 
-//      TransactionTypes.USERTOEXTERNAL -> {
-//        return CreateTransactionDto.Builder()
-//          .withFromUser(fromAccount?.ownerUser)
-//          .withToExternal()
-//          .withFromEmail(fromAccount.email)
-//          .
-//      }
+      TransactionTypes.USERTOEXTERNAL -> {
+        return CreateTransactionDto.Builder()
+          .withFromUser(fromAccount?.ownerUser)
+          .withFromEmail(fromAccount?.email!!)
+          .withToExternal(transferFundsDto.toExternal)
+          .withToEmail(transferFundsDto.toExternal?.email!!)
+          .withFromAccount(fromAccount)
+          .withTransactionType(TransactionTypes.USERTOEXTERNAL)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
+
+      TransactionTypes.MERCHANTTOUSER -> {
+        return CreateTransactionDto.Builder()
+          .withFromMerchant(fromMerchant)
+          .withFromEmail(fromMerchant?.email!!)
+          .withToEmail(toAccount?.email!!)
+          .withFromAccount(fromAccount)
+          .withToAccount(toAccount)
+          .withToUser(toAccount.ownerUser)
+          .withTransactionType(TransactionTypes.MERCHANTTOUSER)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
+
+      TransactionTypes.USERTOMERCHANT -> {
+        return CreateTransactionDto.Builder()
+          .withFromAccount(fromAccount)
+          .withFromEmail(fromAccount?.email!!)
+          .withFromUser(fromAccount.ownerUser)
+          .withToAccount(toAccount)
+          .withToEmail(toMerchant?.email!!)
+          .withToMerchant(toMerchant)
+          .withTransactionType(TransactionTypes.USERTOMERCHANT)
+          .withTransactionId(UUID.randomUUID().toString())
+          .withCurrency(transferFundsDto.currency)
+          .withAmount(transferFundsDto.amount)
+          .withStatus(TransactionStatuses.SUCCESS)
+          .withDescription(transferFundsDto.transferDescription)
+          .build()
+      }
 
       else -> throw IllegalArgumentException("Incorrect transaction type provided")
     }

@@ -4,6 +4,7 @@ extend type Query {
 
 extend type Mutation {
     createAccount(userId: Int!, input: CreateAccountInput!): Account
+    addMerchantAccount(userId: Int!, input: CreateMerchantAccountInput): Account
     updateAccount(userId: Int!, input: UpdateAccountInput!): Account
     transferFunds(userId: Int!, input: TransferFundsInput!): String
     reverseFunds(userId: Int!, input: TransferFundsInput!): String
@@ -44,6 +45,13 @@ input TransferFundsInput {
     transferDescription: String
 }
 
+input CreateMerchantAccountInput {
+    merchantId: String!
+    email: String
+    name: String
+    currency: Currencies!
+}
+
 type Account {
     id: Int!
     email: String!
@@ -53,3 +61,4 @@ type Account {
     balance: Int!
     ownerUser: User
 }
+

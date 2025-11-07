@@ -31,10 +31,10 @@ class MerchantController(
   @RequiresAuthGraph
   fun addUserMerchant(
     @Argument("userId") userId: Long,
-
     environment: DataFetchingEnvironment
   ) {
 
   }
+
 
 }
