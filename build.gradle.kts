@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.nompay"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT"
 description = "Nompay banking rewriting with kotlin"
 
 java {
@@ -28,6 +28,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
   implementation("org.springframework.boot:spring-boot-starter-data-redis")
+  implementation("org.flywaydb:flyway-core:9.21.1")
+  implementation("org.flywaydb:flyway-mysql:9.21.1")
   implementation("com.auth0:java-jwt:4.4.0")
   implementation("org.mindrot:jbcrypt:0.4")
   implementation("jakarta.validation:jakarta.validation-api:3.0.2")
