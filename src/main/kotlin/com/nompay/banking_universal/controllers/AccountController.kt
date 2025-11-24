@@ -3,6 +3,7 @@ package com.nompay.banking_universal.controllers
 import com.nompay.banking_universal.annotations.graphAuth.RequiresAuthGraph
 import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
 import com.nompay.banking_universal.repositories.dto.account.CreateMerchantAccountDto
+import com.nompay.banking_universal.repositories.dto.account.GetMerchantAccountsDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
 import com.nompay.banking_universal.repositories.entities.TransactionEntity
@@ -11,6 +12,7 @@ import com.nompay.banking_universal.services.impl.AccountServiceImpl
 import graphql.schema.DataFetchingEnvironment
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
+import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
 
 @Controller
@@ -26,6 +28,16 @@ class AccountController(
     environment: DataFetchingEnvironment
   ): AccountEntity {
     return this.accountService.createAccount(input);
+  }
+
+  @QueryMapping(name = "getMerchantAccounts")
+  @RequiresAuthGraph
+  fun getMerchantAccounts(
+    @Argument("userId") userId: Long,
+    @Argument("merchantId") merchantId: String,
+    environment: DataFetchingEnvironment
+  ): GetMerchantAccountsDto {
+    return this.accountService.getMerchantAccounts(userId, merchantId)
   }
 
   @MutationMapping(name = "transferFunds")

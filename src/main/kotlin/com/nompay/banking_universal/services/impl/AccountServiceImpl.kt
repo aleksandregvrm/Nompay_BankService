@@ -3,6 +3,7 @@ package com.nompay.banking_universal.services.impl
 import com.nompay.banking_universal.repositories.dto.account.CreateAccountDto
 import com.nompay.banking_universal.repositories.dto.account.CreateMerchantAccountDto
 import com.nompay.banking_universal.repositories.dto.account.FindAccountsToTransferDto
+import com.nompay.banking_universal.repositories.dto.account.GetMerchantAccountsDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsDto
 import com.nompay.banking_universal.repositories.dto.account.TransferFundsInternallyDto
 import com.nompay.banking_universal.repositories.entities.AccountEntity
@@ -11,6 +12,7 @@ import com.nompay.banking_universal.repositories.entities.MerchantEntity
 import com.nompay.banking_universal.repositories.entities.MerchantEntityRepository
 import com.nompay.banking_universal.repositories.entities.TransactionEntity
 import com.nompay.banking_universal.repositories.entities.UserEntityRepository
+import com.nompay.banking_universal.repositories.enums.accounts.AccountTypes
 import com.nompay.banking_universal.repositories.enums.transactions.TransactionTypes
 import com.nompay.banking_universal.services.AccountService
 import com.nompay.banking_universal.services.MerchantService
@@ -74,11 +76,11 @@ class AccountServiceImpl(
       name = createAccountDto.name,
       currency = createAccountDto.currency,
       iban = this.ibanService.generateAccountIBAN(),
-      ownerUser = ownerUser
+      ownerUser = ownerUser,
+      accountType = AccountTypes.USERACCOUNT,
     ).apply {
       this.balance = BigDecimal.ZERO
     }
-
     this.accountRepository.save(account);
 
     return account
@@ -86,6 +88,7 @@ class AccountServiceImpl(
 
   override fun createMerchantAccount(createMerchantAccountDto: CreateMerchantAccountDto, userId: Long): AccountEntity {
     val merchant = this.merchantService.getMerchantById(createMerchantAccountDto.merchantId!!)
+      ?: throw BadRequestException("No merchant detected for ${createMerchantAccountDto.merchantId}")
 
     // Checking whether the user is authorized to create a merchant account. whether it is included in the merchant configuration
     if (!merchant.ownerUser.id?.equals(userId)!! ||
@@ -107,7 +110,7 @@ class AccountServiceImpl(
       ownerMerchant = merchant,
       currency = createMerchantAccountDto.currency!!,
       iban = this.ibanService.generateAccountIBAN(),
-      accountType = createMerchantAccountDto.accountType
+      accountType = AccountTypes.MERCHANTACCOUNT
     )
 
     val merchantAccountEntity = this.accountRepository.save<AccountEntity>(merchantAccount)
@@ -115,7 +118,6 @@ class AccountServiceImpl(
     merchant.merchantAccounts.add(merchantAccountEntity) // Adding an account to the merchant accounts list
 
     this.merchantRepository.save<MerchantEntity>(merchant) // Updating the existing merchant with an updated bound accounts list
-
     return merchantAccountEntity
   }
 
@@ -237,5 +239,29 @@ class AccountServiceImpl(
 
   override fun transferFundsInternallyWithDiffCurrency(): String {
     TODO("Not yet implemented")
+  }
+
+  override fun getMerchantAccounts(userId: Long, merchantId: String): GetMerchantAccountsDto {
+    val merchant = this.merchantService.getMerchantById(merchantId)
+      ?: throw BadRequestException("No merchant detected for ${merchantId}")
+
+    // Checking whether the user is authorized to create a merchant account. whether it is included in the merchant configuration
+    if (!merchant.ownerUser.id?.equals(userId)!! ||
+      (merchant.accessorUsers?.isNotEmpty()!! && merchant.accessorUsers?.map { it.id == userId }
+        ?.isEmpty()!!)
+    ) {
+      throw BadRequestException("Cannot get Merchant Accounts from Non-Authorized user")
+    }
+
+    val merchantAccounts = this.accountRepository.getAccountsByOwnerMerchantId(merchantId)
+
+    if (merchantAccounts.isNullOrEmpty()) {
+      throw BadRequestException("No accounts found for this merchant")
+    }
+
+    return GetMerchantAccountsDto(
+      merchant,
+      merchantAccounts
+    )
   }
 }

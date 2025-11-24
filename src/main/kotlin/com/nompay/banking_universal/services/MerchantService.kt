@@ -5,5 +5,5 @@ import com.nompay.banking_universal.repositories.entities.MerchantEntity
 
 interface MerchantService {
   fun createMerchant(createMerchantDto: CreateMerchantDto): MerchantEntity
-  fun getMerchantById(merchantId: String): MerchantEntity
+  fun getMerchantById(merchantId: String): MerchantEntity?
 }

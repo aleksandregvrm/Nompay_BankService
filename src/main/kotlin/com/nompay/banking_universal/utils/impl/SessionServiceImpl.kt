@@ -63,6 +63,7 @@ class SessionServiceImpl(
       val verifier = JWT.require(Algorithm.HMAC256(this.tokenSecret))
         .withIssuer(this.sessionGiverOrganization)
         .build()
+
       val decodedJwt = verifier.verify(token);
 
       this.checkUserRole(
@@ -144,7 +145,7 @@ class SessionServiceImpl(
   override fun refreshSession(userId: Long): RefreshSessionReturnDto {
     val activeRefreshToken = this.cachingService.getValue("${userId}_refreshToken")
 
-    if(activeRefreshToken == null){
+    if (activeRefreshToken == null) {
       this.removeSessionFromDbIfActive(userId)
       throw BadRequestException("Refresh token is no longer valid, Please re-login")
     }

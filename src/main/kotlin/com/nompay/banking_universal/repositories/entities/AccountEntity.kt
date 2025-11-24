@@ -36,12 +36,13 @@ class AccountEntity(
   var ownerUser: UserEntity? = null,
 
   @ManyToOne
-  @JoinColumn(name = "owner_merchant_id")
+  @JoinColumn(name = "owner_merchant_id", nullable = false)
   var ownerMerchant: MerchantEntity? = null,
 
-  @Column(name = "account_type")
+  @Enumerated(EnumType.STRING)
+  @Column(name = "account_type", nullable = false)
   var accountType: AccountTypes? = null
-) {
+  ) {
 
   @OneToMany(mappedBy = "fromAccount", cascade = [CascadeType.ALL], orphanRemoval = true)
   var transactions: MutableList<TransactionEntity> = mutableListOf()
@@ -74,4 +75,5 @@ interface AccountEntityRepository : JpaRepository<AccountEntity, Long> {
   fun getAccountsByEmail(email: String): List<AccountEntity>?
   fun getAccountByIban(iban: String): AccountEntity?
   fun getAccountByOwnerMerchantId(ownerMerchantId: String): AccountEntity?
+  fun getAccountsByOwnerMerchantId(ownerMerchantId: String): List<AccountEntity>?
 }

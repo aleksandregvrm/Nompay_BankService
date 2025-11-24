@@ -1,5 +1,6 @@
 extend type Query {
-    getAccount(id: Int!): Account
+    getAccount(userId: Int!): Account
+    getMerchantAccounts(userId: Int!, merchantId: String!): GetMerchantAccountsOutput
 }
 
 extend type Mutation {
@@ -15,6 +16,11 @@ enum Currencies {
     GBP,
     EUR,
     GEL
+}
+
+enum AccountType {
+    USERACCOUNT,
+    MERCHANTACCOUNT
 }
 
 input CreateAccountInput {
@@ -60,5 +66,11 @@ type Account {
     iban: String!
     balance: Int!
     ownerUser: User
+    accountType: AccountType
+    ownerMerchant: Merchant
 }
 
+type GetMerchantAccountsOutput {
+    ownerMerchant: Merchant!
+    merchantAccounts: [Account]!
+}

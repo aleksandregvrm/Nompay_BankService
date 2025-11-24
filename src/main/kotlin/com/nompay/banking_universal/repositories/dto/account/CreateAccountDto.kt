@@ -1,5 +1,6 @@
 package com.nompay.banking_universal.repositories.dto.account
 
+import com.nompay.banking_universal.repositories.enums.accounts.AccountTypes
 import com.nompay.banking_universal.repositories.enums.other.Currencies
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -15,4 +16,4 @@ data class CreateAccountDto(
 
   @field:NotNull("Please provide the currency")
   val currency: Currencies
-  )
+)
