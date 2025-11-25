@@ -2,12 +2,15 @@ package com.nompay.banking_universal.controllers
 
 import com.nompay.banking_universal.annotations.graphAuth.RequiresAuthGraph
 import com.nompay.banking_universal.repositories.dto.merchants.CreateMerchantDto
+import com.nompay.banking_universal.repositories.dto.merchants.GetAllMerchantsDto
 import com.nompay.banking_universal.repositories.entities.MerchantEntity
+import com.nompay.banking_universal.repositories.enums.merchants.MerchantStatuses
 import com.nompay.banking_universal.repositories.enums.user.UserRoles
 import com.nompay.banking_universal.services.MerchantService
 import graphql.schema.DataFetchingEnvironment
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
+import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.stereotype.Controller
 
 @Controller
@@ -22,8 +25,6 @@ class MerchantController(
     @Argument("input") input: CreateMerchantDto,
     environment: DataFetchingEnvironment
   ): MerchantEntity {
-    println(input)
-    println("logging the input of create merchant input")
     return this.merchantServiceImpl.createMerchant(input)
   }
 
@@ -36,5 +37,24 @@ class MerchantController(
 
   }
 
+  @QueryMapping(name = "getAllMerchants")
+  @RequiresAuthGraph(roles = [UserRoles.ADMIN])
+  fun getAllMerchants(
+    @Argument("userId") userId: Long,
+    @Argument("input") input: GetAllMerchantsDto,
+    environment: DataFetchingEnvironment
+  ): List<MerchantEntity> {
+    return this.merchantServiceImpl.getAllMerchants(input)
+  }
 
+  @MutationMapping
+  @RequiresAuthGraph(roles = [UserRoles.ADMIN])
+  fun updateMerchantStatus(
+    @Argument("userId") userId: Long,
+    @Argument("status") status: MerchantStatuses,
+    @Argument("merchantId") merchantId: String,
+    environment: DataFetchingEnvironment
+  ): String {
+    return this.merchantServiceImpl.updateMerchantStatus(status, merchantId)
+  }
 }

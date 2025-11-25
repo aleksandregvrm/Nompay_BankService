@@ -21,6 +21,7 @@ import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.UuidGenerator
 import org.hibernate.type.SqlTypes
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import java.time.Instant
 
 @Entity
@@ -47,7 +48,7 @@ class MerchantEntity(
 
   @Column(name = "merchant_status")
   @Enumerated(EnumType.STRING)
-  val status: MerchantStatuses,
+  var status: MerchantStatuses,
 
   @Column(name = "email")
   val email: String,
@@ -82,6 +83,6 @@ class MerchantEntity(
   }
 }
 
-interface MerchantEntityRepository : JpaRepository<MerchantEntity, String> {
+interface MerchantEntityRepository : JpaRepository<MerchantEntity, String>, JpaSpecificationExecutor<MerchantEntity> {
 
 }

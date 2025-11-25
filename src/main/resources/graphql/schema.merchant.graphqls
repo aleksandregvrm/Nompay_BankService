@@ -1,12 +1,13 @@
 extend type Query {
     getMerchant(userId: Int!): Merchant!
-    getAllMerchants(userId: Int!): Merchant!
+    getAllMerchants(userId: Int!, input: GetAllMerchantsInput): [Merchant]
 }
 
 extend type Mutation {
     createMerchant(userId: Int!, input: CreateMerchantInput!): Merchant
     addUserMerchant(userId: Int!, userToAddId: Int): String
     editMerchant(userId: Int!, input: EditMerchantInput): Merchant
+    updateMerchantStatus(userId: Int!, status: MerchantStatus!, merchantId: String!): String
 }
 # Inputs
 input CreateMerchantInput {
@@ -31,6 +32,15 @@ input EditMerchantInput {
     email: String
     deleteAccessorUser: Int
     billing: MerchantBillingInput
+}
+
+input GetAllMerchantsInput {
+    createDate: String
+    legalName: String
+    merchantCountry: String
+    ownerUser: String
+    fromAccountCount: Int
+    toAccountCount: Int
 }
 
 # Enums
